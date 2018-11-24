@@ -71,7 +71,7 @@
 		MovieRental,
 		MovieTheater,
 		MovingCompany,
-		Meseum,
+		Museum,
 		NightClub,
 		Painter,
 		Park,

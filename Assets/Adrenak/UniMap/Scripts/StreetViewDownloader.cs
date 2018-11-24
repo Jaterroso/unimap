@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Text;
 using UnityEngine;
+using System.Net.Security;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace Adrenak.UniMap {
 	[Serializable]
-	public class StreetViewDownloader {
+	public class StreetViewDownloader : IDisposable {
 		// ================================================
 		// EVENTS
 		// ================================================
@@ -38,21 +41,19 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		Dictionary<StreetView.Face, Texture2D> textures = new Dictionary<StreetView.Face, Texture2D>();
 
+		bool m_Disposed;
+
+		public StreetViewDownloader() {
+			ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(MyRemoteCertificateValidationCallback);
+		}
+
 		// ================================================
 		// METHODS
 		// ================================================
 		/// <summary>
 		/// Starts downloads of face textures
 		/// </summary>
-		/// <param name="sequentially">If all the faces should be downloaded one after the other or all at the same time</param>
-		public void DownloadAll(bool sequentially = true) {
-			if (sequentially)
-				CoroutineRunner.Instance.StartCoroutine(DownloadAllSequentially());
-			else
-				DownloadAllSimulatenously();
-		}
-
-		void DownloadAllSimulatenously() {
+		public void Download() {
 			DownloadFace(StreetView.Face.Up);
 			DownloadFace(StreetView.Face.Down);
 			DownloadFace(StreetView.Face.Front);
@@ -60,44 +61,33 @@ namespace Adrenak.UniMap {
 			DownloadFace(StreetView.Face.Left);
 			DownloadFace(StreetView.Face.Right);
 		}
-
-		IEnumerator DownloadAllSequentially() {
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Up));
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Down));
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Front));
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Back));
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Left));
-			yield return CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(StreetView.Face.Right));
-		}
-
+		
 		/// <summary>
 		/// Downloads a single face texture
 		/// </summary>
 		/// <param name="face"></param>
 		public void DownloadFace(StreetView.Face face) {
-			CoroutineRunner.Instance.StartCoroutine(DownloadFaceCo(face));
-		}
-
-		IEnumerator DownloadFaceCo(StreetView.Face face) {
-			var url = GetURL(face);
-			WWW request = new WWW(url);
-
-			yield return request;
-
-			if (!string.IsNullOrEmpty(request.error)) {
-				var message = request.error + ". " + request.text;
-				Debug.LogWarning("Failed to download side " + face.ToString() + ". Message :" + message);
-				if (OnFaceTextureFailed != null) OnFaceTextureFailed(face, message);
-			}
-			else {
-
-				var tex = new Texture2D(1, 1);
-				request.LoadImageIntoTexture(tex);
-				SetFaceTexture(face, tex);
-				if (OnFaceTextureDownloaded != null) OnFaceTextureDownloaded(face, tex);
+			using (WebClient client = new WebClient()) {
+				client.DownloadDataCompleted += delegate (object sender, DownloadDataCompletedEventArgs e) {
+					if (m_Disposed) return;
+					Dispatcher.Instance.Enqueue(() => {
+						if (e.Error == null) {
+							var tex = new Texture2D(1, 1);
+							tex.LoadImage(e.Result, false);
+							tex.Apply();
+							SetFaceTexture(face, tex);
+							if (OnFaceTextureDownloaded != null) OnFaceTextureDownloaded(face, tex);
+						}
+						else {
+							if (OnFaceTextureFailed != null) OnFaceTextureFailed(face, e.Error.ToString());
+						}
+					});
+				};
+				var url = GetURL(face);
+				client.DownloadDataAsync(new Uri(url));
 			}
 		}
-
+		
 		/// <summary>
 		/// Gets the request URL for the given face given the API parameters.
 		/// </summary>
@@ -120,8 +110,8 @@ namespace Adrenak.UniMap {
 
 			sb.Append("&size=").Append(options.resolution).Append("x").Append(options.resolution)
 			.Append("&fov=").Append(options.fov)
-			.Append("&heading=").Append((options.heading % 360) + EnumToValue.HeadingFrom(face) + options.heading)
-			.Append("&pitch=").Append(EnumToValue.PitchFrom(face) + options.pitch)
+			.Append("&heading=").Append((options.heading % 360) + EnumUtility.HeadingFrom(face) + options.heading)
+			.Append("&pitch=").Append(EnumUtility.PitchFrom(face) + options.pitch)
 			.Append("&radius=").Append(options.radius)
 			.Append("&source=").Append(EnumToString.From(options.source));
 
@@ -152,6 +142,37 @@ namespace Adrenak.UniMap {
 			}
 			else
 				textures.Add(face, texture);
+		}
+
+		bool MyRemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
+			bool flag = true;
+			if (sslPolicyErrors != SslPolicyErrors.None) {
+				for (int index = 0; index < chain.ChainStatus.Length; ++index) {
+					if (chain.ChainStatus[index].Status != X509ChainStatusFlags.RevocationStatusUnknown) {
+						chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+						chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+						chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+						chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+						if (!chain.Build((X509Certificate2)certificate))
+							flag = false;
+					}
+				}
+			}
+			return flag;
+		}
+
+		public void Dispose() {
+			m_Disposed = true;
+
+			// Unsubscribe all listeners
+			foreach (var listener in OnFaceTextureFailed.GetInvocationList())
+				OnFaceTextureFailed -= (FaceTextureFailedHandler)listener;
+
+			foreach (var listener in OnFaceTextureDownloaded.GetInvocationList())
+				OnFaceTextureDownloaded -= (FaceTextureDownloadedHandler)listener;
+
+			foreach (var pair in textures)
+				MonoBehaviour.Destroy(pair.Value);
 		}
 	}
 }

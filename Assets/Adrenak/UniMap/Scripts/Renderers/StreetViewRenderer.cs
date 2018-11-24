@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace Adrenak.UniMap {
 	public class StreetViewRenderer : MonoBehaviour {
@@ -9,9 +10,13 @@ namespace Adrenak.UniMap {
 		Material material;
 
 		public void Start() {
-			material = new Material(Shader.Find("Firexit/Unlit/Cubemap"));
+			Dispatcher.Instance.Init();
 
+			material = new Material(Shader.Find("Adrenak/Unlit/Cubemap"));
+			int c = 0;
 			downloader.OnFaceTextureDownloaded += delegate (StreetView.Face face, Texture2D tex) {
+				c++;
+				File.WriteAllBytes(Application.dataPath.Replace("Assets", "") + "/" + c + ".jpg", tex.EncodeToJPG());
 				AddToCubemap(face, tex);
 			};
 

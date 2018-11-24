@@ -56,7 +56,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 09f66143cf7d06a42ac93817883a21ad, type: 2}
+  - {fileID: 2100000, guid: 8c18202606cc43c4390684479715b6df, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -94,19 +94,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetRenderer: {fileID: 23113696622216338}
-  StreetView:
+  downloader:
     options:
-      key: AIzaSyAzYNj5AyuB0e8KSmSdyzMLYnYtJRVnNho
-      mode: 1
-      latitude: 0
-      longitude: 0
+      key: 
+      mode: 0
+      location:
+        lat: 0
+        lng: 0
       panoID: 
-      location: 
+      place: 
       fov: 90
       heading: 0
       radius: 50
       pitch: 0
-      source: 0
+      source: 1
       resolution: 512
 --- !u!135 &135279167025370748
 SphereCollider:

@@ -14,14 +14,13 @@ namespace Adrenak.UniMap {
 		}
 
 		public void Save () {
-			downloader.DownloadUsingURL(urlInput.text, texture => {
+			var id = PanoDownloader.GetIDFromURL(urlInput.text);
+			downloader.Download(id, texture => {
 				if(texture == null) {
 					message.text = "Could not download that pano";
 				}
 				else {
 					try {
-						var id = PanoDownloader.GetIDFromURL(urlInput.text);
-
 						var dir = Path.Combine(Application.dataPath.Replace("Assets", ""), "SavedPanos");
 						Directory.CreateDirectory(dir);
 

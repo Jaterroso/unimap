@@ -50,6 +50,7 @@ namespace Adrenak.UniMap {
 		/// Used to prefer results from a specified area
 		/// </summary>
 		public enum LocationBias {
+			None,
 			IP,
 			Point,
 			Circular,
@@ -169,16 +170,16 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="onResult">Action that returns the response as a c# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
-		public void Send(Action<PlaceSearchResponse> onResult, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SearchCo(onResult, onException));
+		public void Send(Action<FindPlaceResponse> onResult, Action<Exception> onException) {
+			CoroutineRunner.Instance.StartCoroutine(SearchAsync(onResult, onException));
 		}
 
 #if UNIMAP_RSG_PROMISES
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<PlaceSearchResponse> SendAsync() {
-			var promise = new Promise<PlaceSearchResponse>();
+		public IPromise<FindPlaceResponse> Send() {
+			var promise = new Promise<FindPlaceResponse>();
 			Send(
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
@@ -190,7 +191,7 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// INNER METHODS
 		// ================================================
-		IEnumerator SearchCo(Action<PlaceSearchResponse> onResult, Action<Exception> onException) {
+		IEnumerator SearchAsync(Action<FindPlaceResponse> onResult, Action<Exception> onException) {
 			// Try to get the url
 			string url;
 			try {
@@ -210,7 +211,7 @@ namespace Adrenak.UniMap {
 			}
 			else {
 				try {
-					var result = JsonUtility.FromJson<PlaceSearchResponse>(request.text);
+					var result = JsonUtility.FromJson<FindPlaceResponse>(request.text);
 					onResult(result);
 				}
 				catch(Exception e) {

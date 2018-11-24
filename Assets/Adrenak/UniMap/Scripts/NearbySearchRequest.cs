@@ -124,14 +124,14 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="onResult"></param>
 		public void Send(Action<NearbySearchResponse> onResult, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendCo(onResult, onException));
+			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResult, onException));
 		}
 
 #if UNIMAP_RSG_PROMISES
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<NearbySearchResponse> SendAsync() {
+		public IPromise<NearbySearchResponse> Send() {
 			var promise = new Promise<NearbySearchResponse>();
 			Send(
 				result => promise.Resolve(result),
@@ -143,7 +143,7 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// INNER METHODS
 		// ================================================
-		IEnumerator SendCo(Action<NearbySearchResponse> onResult, Action<Exception> onException) {
+		IEnumerator SendAsync(Action<NearbySearchResponse> onResult, Action<Exception> onException) {
 			string url;
 			try {
 				url = GetURL();

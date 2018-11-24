@@ -19,6 +19,6 @@ public class StreetViewExample : MonoBehaviour {
 
 	void UpdateLocation(string newLocation) {
 		streetRenderer.downloader.options.place = newLocation;
-		streetRenderer.downloader.DownloadAll(false);
+		streetRenderer.downloader.Download();
 	}
 }

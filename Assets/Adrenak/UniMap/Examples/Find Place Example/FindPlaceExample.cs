@@ -16,7 +16,7 @@ public class FindPlaceExample : MonoBehaviour {
 
 #if UNIMAP_RSG_PROMISES
 		// Promise search
-		search.SendAsync()
+		search.Send()
 			.Then(response => Debug.Log(JsonUtility.ToJson(response)))
 			.Catch(exception => Debug.LogError(exception));
 #endif

@@ -15,7 +15,7 @@ public class TextSearchExample : MonoBehaviour {
 
 #if UNIMAP_RSG_PROMISES
 		// Promise search
-		request.SendAsync()
+		request.Send()
 			.Then(response => Debug.Log(JsonUtility.ToJson(response)))
 			.Catch(exception => Debug.LogError(exception));
 #endif

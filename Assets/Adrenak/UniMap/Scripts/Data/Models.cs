@@ -120,7 +120,7 @@ namespace Adrenak.UniMap {
 	}
 
 	[Serializable]
-	public class PlaceSearchResponse {
+	public class FindPlaceResponse {
 		public List<Place> candidates;
 		public DebugLog debug_log;
 		public string status;

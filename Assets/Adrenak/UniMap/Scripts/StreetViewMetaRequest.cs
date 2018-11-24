@@ -51,14 +51,14 @@ namespace Adrenak.UniMap {
 		/// <param name="onResponse">Action that returns the response as a C# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
 		public void Send(Action<StreetViewMetaResponse> onResponse, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendCo(onResponse, onException));
+			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResponse, onException));
 		}
 
 #if UNIMAP_RSG_PROMISES
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<StreetViewMetaResponse> SendAsync() {
+		public IPromise<StreetViewMetaResponse> Send() {
 			var promise = new Promise<StreetViewMetaResponse>();
 			Send(
 				response => promise.Resolve(response),
@@ -68,7 +68,7 @@ namespace Adrenak.UniMap {
 		}
 #endif
 
-		IEnumerator SendCo(Action<StreetViewMetaResponse> onResponse, Action<Exception> onException) {
+		IEnumerator SendAsync(Action<StreetViewMetaResponse> onResponse, Action<Exception> onException) {
 			string url;
 			try {
 				url = GetURL();

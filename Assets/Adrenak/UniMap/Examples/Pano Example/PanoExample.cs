@@ -13,7 +13,7 @@ namespace Adrenak.UniMap {
 
 			while (true) {
 				foreach (var url in urls) {
-					view.pano.DownloadUsingURL(url);
+					view.pano.Download(PanoDownloader.GetIDFromURL(url));
 					yield return new WaitForSeconds(delay);
 				}
 			}

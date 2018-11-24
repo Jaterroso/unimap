@@ -1,5 +1,5 @@
 ﻿namespace Adrenak.UniMap {
-	public class EnumToValue {
+	public class EnumUtility {
 		public static int HeadingFrom(StreetView.Face face) {
 			switch (face) {
 				case StreetView.Face.Right: return 90;

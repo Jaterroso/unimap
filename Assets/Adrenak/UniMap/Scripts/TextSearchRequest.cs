@@ -114,14 +114,14 @@ namespace Adrenak.UniMap {
 		/// <param name="onResponse">Action that returns the response as a c# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
 		public void Send(Action<TextSearchResponse> onResponse, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendCo(onResponse, onException));
+			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResponse, onException));
 		}
 
 #if UNIMAP_RSG_PROMISES
 		/// <summary>
-		/// Send the API request and return a promise for the response
+		/// Sends the API request and returns a promise for the response
 		/// </summary>
-		public IPromise<TextSearchResponse> SendAsync() {
+		public IPromise<TextSearchResponse> Send() {
 			var promise = new Promise<TextSearchResponse>();
 			Send(
 				result => promise.Resolve(result),
@@ -134,7 +134,7 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// INNER METHODS
 		// ================================================
-		IEnumerator SendCo(Action<TextSearchResponse> onResponse, Action<Exception> onException) {
+		IEnumerator SendAsync(Action<TextSearchResponse> onResponse, Action<Exception> onException) {
 			string url;
 			try {
 				url = GetURL();

@@ -266,6 +266,36 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 8c18202606cc43c4390684479715b6df, type: 2}
+    - target: {fileID: 114985087744175698, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: downloader.options.key
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114985087744175698, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: downloader.options.mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114985087744175698, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: downloader.options.place
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114985087744175698, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: downloader.options.source
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114985087744175698, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: downloader.options.radius
+      value: 50000
+      objectReference: {fileID: 0}
+    - target: {fileID: 33136236225315036, guid: e572d779cd77d0048a9e1705f4ba530f,
+        type: 2}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e572d779cd77d0048a9e1705f4ba530f, type: 2}
   m_IsPrefabParent: 0
