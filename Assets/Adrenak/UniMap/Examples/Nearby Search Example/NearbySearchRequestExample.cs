@@ -15,11 +15,9 @@ public class NearbySearchRequestExample : MonoBehaviour {
 			exception => Debug.LogError(exception)
 		);
 
-#if UNIMAP_RSG_PROMISES
 		// Promise search
 		request.Send()
 			.Then(response => Debug.Log(JsonUtility.ToJson(response)))
 			.Catch(exception => Debug.LogError(exception));
-#endif
 	}
 }

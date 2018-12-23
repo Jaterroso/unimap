@@ -1,7 +1,4 @@
-﻿#if UNIMAP_RSG_PROMISES
-using RSG;
-#endif
-
+﻿using Adrenak.Unex;
 using System.Collections;
 using System;
 using System.Text;
@@ -117,7 +114,6 @@ namespace Adrenak.UniMap {
 			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResponse, onException));
 		}
 
-#if UNIMAP_RSG_PROMISES
 		/// <summary>
 		/// Sends the API request and returns a promise for the response
 		/// </summary>
@@ -129,7 +125,6 @@ namespace Adrenak.UniMap {
 			);
 			return promise;
 		}
-#endif
 
 		// ================================================
 		// INNER METHODS

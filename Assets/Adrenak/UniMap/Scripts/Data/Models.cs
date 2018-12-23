@@ -135,4 +135,40 @@ namespace Adrenak.UniMap {
 		public string status;
 	}
 
+	[Serializable]
+	public class AddressComponent {
+		public string long_name;
+		public string short_name;
+		public List<string> types;
+	}
+
+	[Serializable]
+	public class GeocodingResponse {
+		public List<GeocodingResult> results;
+		public string status;
+	}
+
+	[Serializable]
+	public class GeocodingResult {
+		public List<AddressComponent> address_components;
+		public string formatted_address;
+		public Geometry geometry;
+		public string place_id;
+		public PlusCode plus_code;
+		public List<string> types;
+	}
+	
+	[Serializable]
+	public class GeolookUpResult {
+		public List<AddressComponent> address_components;
+		public string formatted_address;
+		public Geometry geometry;
+		public string place_id;
+		public List<string> types;
+	}
+
+	[Serializable]
+	public class GeolookupResponse {
+		public List<GeolookUpResult> results;
+	}
 }

@@ -1,7 +1,4 @@
-﻿#if UNIMAP_RSG_PROMISES
-using RSG;
-#endif
-
+﻿using Adrenak.Unex;
 using System.Net;
 using System;
 using System.Net.Security;
@@ -38,7 +35,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// BOTH PANOS
 		// ================================================
-#if UNIMAP_RSG_PROMISES
 		public IPromise<Texture2D> Download(string id) {
 			var promise = new Promise<Texture2D>();
 			Download(id,
@@ -47,7 +43,6 @@ namespace Adrenak.UniMap {
 			);
 			return promise;
 		}
-#endif
 
 		/// <summary>
 		/// Downloads a pano from the Pano ID
@@ -80,7 +75,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// USER PANOS
 		// ================================================
-#if UNIMAP_RSG_PROMISES
 		public IPromise<Texture2D> DownloadUserPano(string id) {
 			var promise = new Promise<Texture2D>();
 			DownloadUserPano(id,
@@ -89,7 +83,6 @@ namespace Adrenak.UniMap {
 			);
 			return promise;
 		}
-#endif
 
 		/// <summary>
 		/// Downloads the panorama image using the known PanoID
@@ -126,7 +119,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// GOOGLE PANOS
 		// ================================================
-#if UNIMAP_RSG_PROMISES
 		/// <summary>
 		/// Downloads a Google uploaded panorama using a promise
 		/// </summary>
@@ -140,7 +132,6 @@ namespace Adrenak.UniMap {
 			);
 			return promise;
 		}
-#endif
 
 		/// <summary>
 		/// Downloads a Google uploaded panorama image using the URL
@@ -150,7 +141,7 @@ namespace Adrenak.UniMap {
 		/// <param name="onException">Callback for exception on error</param>
 		public void DownloadGooglePano(string panoID, Action<Texture2D> onResult, Action<Exception> onException) {
 			MonoBehaviour.Destroy(m_Texture);
-			m_Texture = new Texture2D(4096, 2048, TextureFormat.ARGB32, false);
+			m_Texture = new Texture2D(4096, 2048, TextureFormat.RGB24, false);
 
 			int all = 0;
 			int failed = 0;
@@ -164,7 +155,8 @@ namespace Adrenak.UniMap {
 								all++;
 								CopyTileToTexture(tileResult, x, 3 - y);
 								if (all == 32) {
-									TrimTexture();
+									if (NeedsTrimming())
+										TrimTexture();
 									InvokeCallback(onResult, m_Texture);
 									InvokeCallback(OnLoaded, m_Texture);
 								}
@@ -180,7 +172,8 @@ namespace Adrenak.UniMap {
 								failed++;
 
 								if (all == 32) {
-									TrimTexture();
+									if (NeedsTrimming())
+										TrimTexture();
 									InvokeCallback(onResult, m_Texture);
 									InvokeCallback(OnLoaded, m_Texture);
 								}
@@ -198,7 +191,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// GOOGLE PANO TILES
 		// ================================================
-#if UNIMAP_RSG_PROMISES
 		public IPromise<Texture2D> DownloadGooglePanoTile(string panoID, int x, int y) {
 			var promise = new Promise<Texture2D>();
 			DownloadGooglePanoTile(panoID, x, y,
@@ -207,7 +199,6 @@ namespace Adrenak.UniMap {
 			);
 			return promise;
 		}
-#endif
 
 		/// <summary>
 		/// Downloads a 512x512 tile of the pano identified using the PanoID
