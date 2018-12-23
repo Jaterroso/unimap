@@ -11,6 +11,13 @@ namespace Adrenak.UniMap {
 			lat = _lat;
 			lng = _lng;
 		}
+
+		public static Location operator +(Location lhs, Location rhs) {
+			return new Location(
+				rhs.lat + lhs.lat,
+				lhs.lng + lhs.lng
+			);
+		}
 	}
 
 	[Serializable]
