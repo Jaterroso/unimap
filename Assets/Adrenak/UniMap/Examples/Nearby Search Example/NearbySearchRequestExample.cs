@@ -4,7 +4,7 @@ using UnityEngine;
 public class NearbySearchRequestExample : MonoBehaviour {
 	void Start () {
 		var request = new NearbySearchRequest();
-		request.key = Config.key;
+		request.key = "ENTER_KEY_HERE";
 		request.location = new Location(48.8f, 2.35f);
 		request.radius = 1000;
 		request.type = PlaceType.Atm;

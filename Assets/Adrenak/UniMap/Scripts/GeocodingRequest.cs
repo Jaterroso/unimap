@@ -13,7 +13,7 @@ namespace Adrenak.UniMap {
 		public string Region { get; set; }
 
 		public GeocodingRequest(string key, string address) {
-			Core.Init();
+			UniMapInitializer.Setup();
 			Key = key;
 			Address = address;
 		}

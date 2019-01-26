@@ -4,7 +4,7 @@ using UnityEngine;
 public class FindPlaceExample : MonoBehaviour {
 	void Start () {
 		FindPlaceRequest search = new FindPlaceRequest();
-		search.key = Config.key;
+		search.key = "ENTER_KEY_HERE";
 		search.input = "Brighton Beach";
 		search.fields.Add(FindPlaceRequest.Field.FormattedAddress);
 

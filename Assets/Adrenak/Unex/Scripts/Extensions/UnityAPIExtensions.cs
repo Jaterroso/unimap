@@ -190,6 +190,39 @@ namespace Adrenak.Unex {
 			return new Color(avg.x, avg.y, avg.z, 1);
 		}
 
+		public static Texture2D Crop(this Texture2D tex, Rect rect) {
+			var w = tex.width;
+			var h = tex.height;
+
+			var colors = new Color32[(int)rect.width * (int)rect.height];
+
+			var index = 0;
+			var pixels = tex.GetPixels32();
+			for(int i = 0; i < pixels.Length; i++) {
+				var r = i / w;
+				var c = i % w;
+				if(r >= rect.y && r < rect.y + rect.height && c >= rect.x && c < rect.x + rect.width) {
+					colors[index] = pixels[i];
+					index++;
+				}
+			}
+
+			var result = new Texture2D((int)rect.width, (int)rect.height, tex.format, tex.mipmapCount > 0);
+			result.SetPixels32(colors);
+			result.Apply();
+			return result;
+		}
+
+		public static void Copy(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {
+			var pixels = other.GetPixels32();
+			var w = other.width;
+			var h = other.height;
+
+			tex.SetPixels32((int)position.x, (int)position.y, w, h, pixels);
+			if(apply)
+				tex.Apply();
+		}
+
 		public static float GetGreyscale(this Color32 color) {
 			return (color.r + color.g + color.b) / 3;
 		}

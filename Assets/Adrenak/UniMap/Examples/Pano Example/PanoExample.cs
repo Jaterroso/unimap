@@ -7,13 +7,15 @@ namespace Adrenak.UniMap {
 		public PanoRenderer view;
 		public List<string> urls;
 		public float delay;
+		public PanoSize size;
 
 		IEnumerator Start() {
-			Dispatcher.Instance.Init();
+			UniMapInitializer.Setup();
 
 			while (true) {
 				foreach (var url in urls) {
-					view.pano.Download(PanoDownloader.GetIDFromURL(url));
+					var id = PanoUtility.GetIDFromURL(url);
+					view.pano.Download(id, size);
 					yield return new WaitForSeconds(delay);
 				}
 			}

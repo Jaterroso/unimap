@@ -1,7 +1,7 @@
-﻿using WebSocketSharp;
-using System;
+﻿using System;
+using Adrenak.Unex;
 
-namespace Adrenak.Unex {
+namespace WebSocketSharp {
 	public static class WebSocketSharpExtensions {
 		public static void ConnectAsync(this WebSocket socket, Action OnConnect, Action<Exception> OnError) {
 			Action onDone = () => { };

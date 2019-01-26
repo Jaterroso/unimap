@@ -1,12 +1,15 @@
 ﻿using System.Net;
-using System.Collections.Generic;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System;
 
 namespace Adrenak.UniMap {
-	public static class Core {
-		public static void Init() {
+	public static class UniMapInitializer {
+		public static void Setup() {
+			Dispatcher.Instance.Init();
+
+			CoroutineRunner.Instance.Create();
+
 			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => {
 				bool isOk = true;
 				// If there are errors in the certificate chain,

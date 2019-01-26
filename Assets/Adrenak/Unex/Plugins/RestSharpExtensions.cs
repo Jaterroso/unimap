@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using RestSharp;
+using Adrenak.Unex;
 using System;
 
-namespace Adrenak.Unex {
+namespace RestSharp {
 	public static class RestSharpExtensions {
 		public static IPromise<IRestResponse> ExecuteAsync(this RestClient client, RestRequest request) {
 			Promise<IRestResponse> promise = new Promise<IRestResponse>();
@@ -10,7 +10,7 @@ namespace Adrenak.Unex {
 			return promise;
 		}
 
-		public static IPromise<IRestResponse> ExecuteAsync(this RestClient client, RestRequest request, out RestRequestAsyncHandle handle) {
+		public static IPromise<IRestResponse> ExecuteAsync(this RestClient client, RestRequest request, ref RestRequestAsyncHandle handle) {
 			Promise<IRestResponse> promise = new Promise<IRestResponse>();
 			handle = client.ExecuteAsync(request, (response, handler) => promise.Resolve(response));
 			return promise;

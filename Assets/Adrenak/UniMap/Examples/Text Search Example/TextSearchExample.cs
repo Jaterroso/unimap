@@ -4,7 +4,7 @@ using Adrenak.UniMap;
 public class TextSearchExample : MonoBehaviour {
 	void Start () {
 		TextSearchRequest request = new TextSearchRequest();
-		request.key = Config.key;
+		request.key = "ENTER_KEY_HERE";
 		request.query = "MIT manipal";
 
 		// Callback search

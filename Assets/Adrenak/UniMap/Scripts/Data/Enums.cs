@@ -103,4 +103,12 @@
 		VeterinaryCare,
 		Zoo
 	}
+
+	public enum PanoSize {
+		VerySmall,
+		Small,
+		Medium,
+		Large,
+		VeryLarge
+	}
 }

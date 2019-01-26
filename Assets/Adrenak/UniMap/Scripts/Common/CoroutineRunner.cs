@@ -16,5 +16,7 @@ namespace Adrenak.UniMap {
 				return m_Instance;
 			}
 		}
+
+		public void Create() { }
 	}
 }

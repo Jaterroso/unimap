@@ -12,7 +12,7 @@ namespace Adrenak.UniMap {
 		public double Longitude { get; private set; }
 
 		public GeolookupRequest(string key, double lat, double lng) {
-			Core.Init();
+			UniMapInitializer.Setup();
 			Key = key;
 			Latitude = lat;
 			Longitude = lng;

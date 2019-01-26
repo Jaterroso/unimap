@@ -15,7 +15,7 @@ public class PlacePhotoExample : MonoBehaviour {
 	void PromiseExample() {
 		// Create and send a find place request
 		new FindPlaceRequest() {
-			key = Config.key,
+			key = "ENTER_KEY_HERE",
 			inputType = FindPlaceRequest.InputType.TextQuery,
 			input = "Eiffel tower",
 			fields = new List<FindPlaceRequest.Field>() {
@@ -34,7 +34,7 @@ public class PlacePhotoExample : MonoBehaviour {
 		// Use the reference and return the download request
 		.Then(reference => {
 			return new PlacePhotoDownloader() {
-				key = Config.key,
+				key = "ENTER_KEY_HERE",
 				maxWidth = 512,
 				maxHeight = 512,
 				reference = reference
@@ -49,7 +49,7 @@ public class PlacePhotoExample : MonoBehaviour {
 	void CallbackExample() {
 		// Create a find place request
 		new FindPlaceRequest() {
-			key = Config.key,
+			key = "ENTER_KEY_HERE",
 			inputType = FindPlaceRequest.InputType.TextQuery,
 			input = "Eiffel tower",
 			fields = new List<FindPlaceRequest.Field>() {
@@ -61,7 +61,7 @@ public class PlacePhotoExample : MonoBehaviour {
 				// Create a photo download request
 				var reference = response.candidates[0].photos[0].photo_reference;
 				new PlacePhotoDownloader() {
-					key = Config.key,
+					key = "ENTER_KEY_HERE",
 					maxWidth = 512,
 					maxHeight = 512,
 					reference = reference

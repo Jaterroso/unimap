@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.611683, g: 0.60929424, b: 0.6249923, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -484,6 +484,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   urlInput: {fileID: 243330861}
   message: {fileID: 2047422843}
+  size: 1
 --- !u!114 &554991999
 MonoBehaviour:
   m_ObjectHideFlags: 0

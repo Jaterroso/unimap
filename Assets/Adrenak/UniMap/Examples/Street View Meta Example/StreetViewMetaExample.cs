@@ -4,7 +4,7 @@ using UnityEngine;
 public class StreetViewMetaExample : MonoBehaviour {
 	void Start () {
 		var request = new StreetViewMetaRequest();
-		request.options.key = Config.key;
+		request.options.key = "ENTER_KEY_HERE";
 		request.options.mode = StreetView.Mode.Location;
 		request.options.place = "Taj Mahal";
 		request.options.source = StreetView.Source.Outdoor;

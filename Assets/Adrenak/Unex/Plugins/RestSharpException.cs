@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System.Text;
 using System;
-using RestSharp;
 
-namespace Adrenak.Unex {
+namespace RestSharp {
 	public class RestSharpException : Exception {
 		public RestSharpException(HttpStatusCode httpStatusCode, Uri requestUri, string content, string message, Exception innerException)
 			: base(message, innerException) {
