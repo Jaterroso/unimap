@@ -14,14 +14,12 @@ public class PlacePhotoExample : MonoBehaviour {
 	// Using promises, we get a relatively flat flow of code
 	void PromiseExample() {
 		// Create and send a find place request
-		new FindPlaceRequest() {
-			key = "ENTER_KEY_HERE",
+		new FindPlaceRequest("KEY") {
 			inputType = FindPlaceRequest.InputType.TextQuery,
-			input = "Eiffel tower",
 			fields = new List<FindPlaceRequest.Field>() {
 				FindPlaceRequest.Field.Photos
 			}
-		}.Send()
+		}.Send("Manhattan")
 		// Then find place response and return the first photo reference 
 		.Then(response => {
 			Debug.Log(JsonUtility.ToJson(response));
@@ -33,12 +31,10 @@ public class PlacePhotoExample : MonoBehaviour {
 		})
 		// Use the reference and return the download request
 		.Then(reference => {
-			return new PlacePhotoDownloader() {
-				key = "ENTER_KEY_HERE",
-				maxWidth = 512,
-				maxHeight = 512,
-				reference = reference
-			}.Download();
+			return new PlacePhotoDownloader("KEY") {
+				MaxWidth = 512,
+				MaxHeight = 512,
+			}.Download(reference);
 		})
 		// Use the result of the download request, a Texture2D object, to show on the renderer
 		.Then(texture => renderer1.material.mainTexture = texture)
@@ -48,24 +44,22 @@ public class PlacePhotoExample : MonoBehaviour {
 	// Using callbacks, the code tends to indent towards the right
 	void CallbackExample() {
 		// Create a find place request
-		new FindPlaceRequest() {
-			key = "ENTER_KEY_HERE",
+		new FindPlaceRequest("KEY") {
 			inputType = FindPlaceRequest.InputType.TextQuery,
-			input = "Eiffel tower",
 			fields = new List<FindPlaceRequest.Field>() {
 				FindPlaceRequest.Field.Photos
 			}
 		}.Send(
+			"Manhattan",
 			// If the find place request is a success
 			response => {
 				// Create a photo download request
 				var reference = response.candidates[0].photos[0].photo_reference;
-				new PlacePhotoDownloader() {
-					key = "ENTER_KEY_HERE",
-					maxWidth = 512,
-					maxHeight = 512,
-					reference = reference
+				new PlacePhotoDownloader("KEY") {
+					MaxWidth = 512,
+					MaxHeight = 512,
 				}.Download(
+					reference,
 					// If the photo download is a success, show on a renderer
 					texture => renderer2.material.mainTexture = texture,
 					// Else show the exception

@@ -1,8 +1,8 @@
 ﻿using Adrenak.Unex;
 using System;
 using System.Text;
-using System.Collections;
 using UnityEngine;
+using RestSharp;
 
 namespace Adrenak.UniMap {
 	public class PlacePhotoDownloader {
@@ -11,22 +11,52 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// The Google Maps API key
 		/// </summary>
-		public string key;
+		public string Key { get; set; }
 
 		/// <summary>
 		/// Reference ID of the image that has to be downloaded
 		/// </summary>
-		public string reference;
+		public string Reference { get; private set; }
 
 		/// <summary>
-		/// Maximum width of the image to be downloaded
+		/// Maximum width of the image to be downloaded. Default: 512
 		/// </summary>
-		public int maxWidth;
+		public int MaxWidth {
+			get { return m_MaxWidth; }
+			set { m_MaxWidth = value; }
+		}
+		int m_MaxWidth = 512;
 
 		/// <summary>
-		/// Maximum height of the image to be downloaded
+		/// Maximum height of the image to be downloaded. Default: 512
 		/// </summary>
-		public int maxHeight;
+		public int MaxHeight {
+			get { return m_MaxHeight; }
+			set { m_MaxHeight = value; }
+		}
+		int m_MaxHeight;
+
+		/// <summary>
+		/// The TextureFormat of the texture that is downladed by the instance. Default: RGB565
+		/// </summary>
+		public TextureFormat Format {
+			get { return m_Format; }
+			set { m_Format = value; }
+		}
+		TextureFormat m_Format = TextureFormat.RGB565;
+
+		/// <summary>
+		/// Whether mip maps of the download texture are generated
+		/// </summary>
+		public bool IsMipMapped { get; set; }
+
+		/// <summary>
+		/// Creates an instance to download the images
+		/// </summary>
+		/// <param name="key">The Google API key</param>
+		public PlacePhotoDownloader(string key) {
+			Key = key;
+		}
 
 		/// <summary>
 		/// Gets the URL of the request given the current parameter values
@@ -34,10 +64,10 @@ namespace Adrenak.UniMap {
 		/// <returns></returns>
 		public string GetURL() {
 			var builder = new StringBuilder(k_BaseURL);
-			builder.Append("&key=").Append(key)
-				.Append("&photoreference=").Append(reference)
-				.Append("&maxheight=").Append(maxHeight)
-				.Append("&maxwidth=").Append(maxWidth);
+			builder.Append("&key=").Append(Key)
+				.Append("&photoreference=").Append(Reference)
+				.Append("&maxheight=").Append(MaxHeight)
+				.Append("&maxwidth=").Append(MaxWidth);
 
 			return builder.ToString();
 		}
@@ -45,9 +75,10 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<Texture2D> Download() {
+		public IPromise<Texture2D> Download(string reference) {
 			var promise = new Promise<Texture2D>();
 			Download(
+				reference,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
@@ -59,39 +90,32 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="onResponse">Action that returns the response as a c# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
-		public void Download(Action<Texture2D> onResult, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(DownloadAsync(onResult, onException));
-		}
+		public void Download(string reference, Action<Texture2D> onResult, Action<Exception> onException) {
+			this.Reference = reference;
 
-		IEnumerator DownloadAsync(Action<Texture2D> onResult, Action<Exception> onException) {
-			var url = GetURL();
-			WWW www = new WWW(url);
-			yield return www;
-
-			if (string.IsNullOrEmpty(www.error)) {
-				var tex = new Texture2D(1, 1);
-				www.LoadImageIntoTexture(tex);
-				onResult(www.texture);
+			string url = string.Empty;
+			try {
+				url = GetURL();
 			}
-			else {
-				// Try once more
-				www = new WWW(url);
-				yield return www;
-
-				if (string.IsNullOrEmpty(www.error)) {
-					try {
-						var tex = new Texture2D(1, 1);
-						www.LoadImageIntoTexture(tex);
-						onResult(www.texture);
-					}
-					catch (Exception e) {
-						onException(e);
-					}
-				}
-				else {
-					onException(new Exception(www.error));
-				}
+			catch (Exception e) {
+				onException(e);
 			}
+
+			var client = new RestClient();
+			var request = new RestRequest(url, Method.GET);
+			client.ExecuteAsync(request)
+				.Then(response => {
+					if (response.IsSuccess()) {
+						var tex = new Texture2D(1, 1, Format, IsMipMapped);
+						tex.LoadImage(response.RawBytes);
+						onResult.TryInvoke(tex);
+					}
+					else
+						onException.TryInvoke(response.GetException());
+				})
+				.Catch(exception => {
+					onException.TryInvoke(exception);
+				});
 		}
 	}
 }

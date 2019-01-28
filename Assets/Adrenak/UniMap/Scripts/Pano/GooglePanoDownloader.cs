@@ -70,7 +70,8 @@ namespace Adrenak.UniMap {
 							StitchTexture(tile, size, x, ((int)count.y - 1) - y);
 							if (all == total) {
 #if UNITY_ANDROID
-								m_Texture.Apply();
+								if(size == PanoSize.VeryLarge)
+									m_Texture.Apply();
 #endif
 								CropTexture(size);
 								onResult.TryInvoke(m_Texture);

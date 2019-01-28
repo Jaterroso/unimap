@@ -3,6 +3,7 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using RestSharp;
 using UnityEngine;
 
 namespace Adrenak.UniMap {
@@ -62,12 +63,12 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// The Google Maps API key
 		/// </summary>
-		public string key;
+		public string Key { get; private set; }
 
 		/// <summary>
 		/// The query for the search. Eg. "Eiffel Tower" or "+1 1234567890"
 		/// </summary>
-		public string input = string.Empty;
+		public string Input { get; private set; }
 
 		/// <summary>
 		/// Input type for the query. Supported: Text and Phone number
@@ -111,6 +112,15 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		public Location northEast = new Location(0, 0);
 
+		/// <summary>
+		/// Creates a new request object
+		/// </summary>
+		/// <param name="key">The Google Maps API key to use</param>
+		/// <param name="input">The name of the place to be searched for</param>
+		public FindPlaceRequest(string key) {
+			Key = key;
+		}
+
 		// ================================================
 		// PUBLIC METHODS
 		// ================================================
@@ -119,14 +129,14 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		public string GetURL() {
 			// Ensure mandatory parameters
-			if (string.IsNullOrEmpty(key))
+			if (string.IsNullOrEmpty(Key))
 				throw new Exception("Key is null or empty");
-			if (string.IsNullOrEmpty(input))
+			if (string.IsNullOrEmpty(Input))
 				throw new Exception("Input is null or empty");
 
 			var sb = new StringBuilder(k_BaseURL)
-				.Append("key=").Append(key)
-				.Append("&input=").Append(input)
+				.Append("key=").Append(Key)
+				.Append("&input=").Append(Input)
 				.Append("&inputtype=").Append(InputTypeToString(inputType));
 
 			if(!string.IsNullOrEmpty(language))
@@ -165,18 +175,50 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// Send the API request and returns the response or exception
 		/// </summary>
+		/// <param name="input">The name of the place to be searched for</param>
 		/// <param name="onResult">Action that returns the response as a c# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
-		public void Send(Action<FindPlaceResponse> onResult, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SearchAsync(onResult, onException));
+		public void Send(string input, Action<FindPlaceResponse> onResult, Action<Exception> onException) {
+			Input = input;
+
+			string url = string.Empty;
+			try {
+				url = GetURL();
+			}
+			catch (Exception e) {
+				onException(e);
+			}
+
+			var client = new RestClient();
+			var request = new RestRequest(url, Method.GET);
+
+			client.ExecuteAsync(request)
+				.Then(response => {
+					if (response.IsSuccess()) {
+						try {
+							var result = JsonUtility.FromJson<FindPlaceResponse>(response.Content);
+							onResult.TryInvoke(result);
+						}
+						catch (Exception e) {
+							onException.TryInvoke(e);
+						}
+					}
+					else
+						onException.TryInvoke(response.GetException());
+				})
+				.Catch(exception => {
+					onException.TryInvoke(exception);
+				});
 		}
 
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<FindPlaceResponse> Send() {
+		/// <param name="input">The name of the place to be searched</param>
+		public IPromise<FindPlaceResponse> Send(string input) {
 			var promise = new Promise<FindPlaceResponse>();
 			Send(
+				input,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
@@ -186,35 +228,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// INNER METHODS
 		// ================================================
-		IEnumerator SearchAsync(Action<FindPlaceResponse> onResult, Action<Exception> onException) {
-			// Try to get the url
-			string url;
-			try {
-				url = GetURL();
-			}
-			catch(Exception e) {
-				onException(e);
-				yield break;
-			}
-				
-			WWW request = new WWW(url);
-			yield return request;
-
-			if (!string.IsNullOrEmpty(request.error)) {
-				onException(new Exception(request.error + request.text));
-				yield break;
-			}
-			else {
-				try {
-					var result = JsonUtility.FromJson<FindPlaceResponse>(request.text);
-					onResult(result);
-				}
-				catch(Exception e) {
-					onException(e);
-				}
-			}
-		}
-
 		string InputTypeToString(InputType type) {
 			switch (type) {
 				case InputType.PhoneNumber:

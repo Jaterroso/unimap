@@ -6,5 +6,5 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Adrenak/UniMap/Examples/Street View Example/StreetViewExample.unity
-    guid: d72d7cc24c7a8cc4eb383e6bbe550735
+    path: Assets/Adrenak/UniMap/Examples/Pano Example/PanoExample.unity
+    guid: 2516f17d086aa114b8cc919d0a0c9dab

@@ -43,10 +43,6 @@ namespace Adrenak.UniMap {
 
 		bool m_Disposed;
 
-		public StreetViewDownloader() {
-			ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(MyRemoteCertificateValidationCallback);
-		}
-
 		// ================================================
 		// METHODS
 		// ================================================
@@ -143,24 +139,7 @@ namespace Adrenak.UniMap {
 			else
 				textures.Add(face, texture);
 		}
-
-		bool MyRemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
-			bool flag = true;
-			if (sslPolicyErrors != SslPolicyErrors.None) {
-				for (int index = 0; index < chain.ChainStatus.Length; ++index) {
-					if (chain.ChainStatus[index].Status != X509ChainStatusFlags.RevocationStatusUnknown) {
-						chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-						chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-						chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-						chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-						if (!chain.Build((X509Certificate2)certificate))
-							flag = false;
-					}
-				}
-			}
-			return flag;
-		}
-
+		
 		public void Dispose() {
 			m_Disposed = true;
 

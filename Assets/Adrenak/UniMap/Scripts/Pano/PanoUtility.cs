@@ -30,7 +30,9 @@ namespace Adrenak.UniMap {
 				case PanoSize.Large:
 					return 4096;
 				case PanoSize.VeryLarge:
-#if UNITY_ANDROID
+#if UNITY_ANDROID && UNIMAP_PANO_FORCE_VERY_LARGE
+					return 8192;
+#elif UNITY_ANDROID && !UNIMAP_PANO_FORCE_VERY_LARGE
 					return 4096;
 #elif UNITY_EDITOR || UNITY_STANDALONE
 					return 8192;

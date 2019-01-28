@@ -1,8 +1,8 @@
 ﻿using Adrenak.Unex;
 using System.Text;
-using System.Collections;
 using System;
 using UnityEngine;
+using RestSharp;
 
 namespace Adrenak.UniMap {
 	public class StreetViewMetaRequest {
@@ -48,7 +48,33 @@ namespace Adrenak.UniMap {
 		/// <param name="onResponse">Action that returns the response as a C# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
 		public void Send(Action<StreetViewMetaResponse> onResponse, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResponse, onException));
+			string url = string.Empty;
+			try {
+				url = GetURL();
+			}
+			catch (Exception e) {
+				onException(e);
+			}
+
+			var client = new RestClient();
+			var request = new RestRequest(url, Method.GET);
+			client.ExecuteAsync(request)
+				.Then(response => {
+					if (response.IsSuccess()) {
+						try {
+							var result = JsonUtility.FromJson<StreetViewMetaResponse>(response.Content);
+							onResponse.TryInvoke(result);
+						}
+						catch (Exception e) {
+							onException.TryInvoke(e);
+						}
+					}
+					else
+						onException.TryInvoke(response.GetException());
+				})
+				.Catch(exception => {
+					onException.TryInvoke(exception);
+				});
 		}
 
 		/// <summary>
@@ -61,33 +87,6 @@ namespace Adrenak.UniMap {
 				exception => promise.Reject(exception)
 			);
 			return promise;
-		}
-
-		IEnumerator SendAsync(Action<StreetViewMetaResponse> onResponse, Action<Exception> onException) {
-			string url;
-			try {
-				url = GetURL();
-			}
-			catch (Exception e) {
-				onException(e);
-				yield break;
-			}
-
-			WWW request = new WWW(url);
-			yield return request;
-
-			if (!string.IsNullOrEmpty(request.error)) {
-				onException(new Exception(request.error + request.text));
-				yield break;
-			}
-			else {
-				try {
-					onResponse(JsonUtility.FromJson<StreetViewMetaResponse>(request.text));
-				}
-				catch (Exception e) {
-					onException(e);
-				}
-			}
 		}
 	}
 }

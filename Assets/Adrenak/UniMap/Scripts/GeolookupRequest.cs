@@ -5,40 +5,71 @@ using Adrenak.Unex;
 using UnityEngine;
 
 namespace Adrenak.UniMap {
+	/// <summary>
+	/// Used to get the address of a set of coordinates
+	/// </summary>
 	public class GeolookupRequest {
 		const string k_BaseURL = "https://maps.googleapis.com/maps/api/geocode/json?";
-		public string Key { get; private set; }
-		public double Latitude { get; private set; }
-		public double Longitude { get; private set; }
 
-		public GeolookupRequest(string key, double lat, double lng) {
-			UniMapInitializer.Setup();
+		/// <summary>
+		/// The Google Maps API key being used
+		/// </summary>
+		public string Key { get; private set; }
+
+		/// <summary>
+		/// The Location being looked up currently
+		/// </summary>
+		public Location Location { get; private set; }
+
+		/// <summary>
+		/// Creats an instance for lookup requests
+		/// </summary>
+		/// <param name="key"></param>
+		public GeolookupRequest(string key) {
 			Key = key;
-			Latitude = lat;
-			Longitude = lng;
 		}
 
+		/// <summary>
+		/// Gets the URL for the given parameters
+		/// </summary>
+		/// <returns></returns>
 		public string GetURL() {
 			if (Key.IsNullOrEmpty())
 				throw new Exception("No key provided");
 
 			var builder = new StringBuilder(k_BaseURL);
 			builder.Append("key=").Append(Key);
-			builder.Append("&latlng=").Append(Latitude).Append(",").Append(Longitude);
+			builder.Append("&latlng=").Append(Location.lat).Append(",").Append(Location.lng);
 			
 			return builder.ToString();
 		}
 
-		public IPromise<GeolookupResponse> Send() {
+		/// <summary>
+		/// Sends the request for a set of coordinates and returns a promise for the response
+		/// </summary>
+		/// <param name="lat">The latitude of the coordinates to be looked up</param>
+		/// <param name="lng">The longitude of the coordinates to be looked up</param>
+		/// <returns></returns>
+		public IPromise<GeolookupResponse> Send(Location location) {
 			var promise = new Promise<GeolookupResponse>();
 			Send(
+				location,
 				response => promise.Resolve(response),
 				exception => promise.Reject(exception)
 			);
 			return promise;
 		}
 
-		public void Send(Action<GeolookupResponse> onSuccess, Action<Exception> onFailure) {
+		/// <summary>
+		/// Sends the request for a set of coordinates
+		/// </summary>
+		/// <param name="lat">The latitude of the coordinates to be looked up</param>
+		/// <param name="lng">The longitude of the coordinates to be looked up</param>
+		/// <param name="onSuccess">Callback for a successful response</param>
+		/// <param name="onFailure">Callback for an unsuccessful response</param>
+		public void Send(Location location, Action<GeolookupResponse> onSuccess, Action<Exception> onFailure) {
+			Location = location;
+
 			var client = new RestClient();
 			var request = new RestRequest(GetURL(), Method.GET);
 

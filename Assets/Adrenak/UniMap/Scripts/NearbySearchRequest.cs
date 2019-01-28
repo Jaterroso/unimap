@@ -1,8 +1,8 @@
 ﻿using Adrenak.Unex;
 using System.Text;
-using System.Collections;
 using System;
 using UnityEngine;
+using RestSharp;
 
 namespace Adrenak.UniMap {
 	public class NearbySearchRequest {
@@ -19,12 +19,12 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// The Google Maps API key
 		/// </summary>
-		public string key;
+		public string Key { get; private set; }
 
 		/// <summary>
-		/// The <see cref="Location"/> object that represents the coordinates around which the nearby places should be searched for.
+		/// The <see cref="UniMap.Location"/> object that represents the coordinates around which the nearby places should be searched for.
 		/// </summary>
-		public Location location;
+		public Location Location { get; private set; }
 
 		/// <summary>
 		/// The radius (in metres) around the location that should be searched for nearby places
@@ -75,21 +75,25 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// PUBLIC METHODS
 		// ================================================
+		public NearbySearchRequest(string key) {
+			Key = key;
+		}
+
 		/// <summary>
 		/// Gets the request URL for the set parameters
 		/// </summary>
 		/// <returns></returns>
 		public string GetURL() {
-			if (string.IsNullOrEmpty(key))
+			if (string.IsNullOrEmpty(Key))
 				throw new Exception("Key cannot be null or empty");
-			if (location == null)
+			if (Location == null)
 				throw new Exception("Location cannot be null");
 
 			var sb = new StringBuilder(k_BaseURL);
 
 			// Add the parameters that are gaurunteed a value
-			sb.Append("key=").Append(key)
-				.Append("&location=").Append(location.lat).Append(",").Append(location.lng)
+			sb.Append("key=").Append(Key)
+				.Append("&location=").Append(Location.lat).Append(",").Append(Location.lng)
 				.Append("&radius=").Append(radius)
 				.Append("&minprice=").Append(minPriceLevel)
 				.Append("&maxprice=").Append(maxPriceLevel)
@@ -120,16 +124,45 @@ namespace Adrenak.UniMap {
 		/// Send the API request and returns the response or exception
 		/// </summary>
 		/// <param name="onResult"></param>
-		public void Send(Action<NearbySearchResponse> onResult, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResult, onException));
+		public void Send(Location location, Action<NearbySearchResponse> onResult, Action<Exception> onException) {
+			Location = location;
+
+			string url = string.Empty;
+			try {
+				url = GetURL();
+			}
+			catch (Exception e) {
+				onException(e);
+			}
+
+			var client = new RestClient();
+			var request = new RestRequest(url, Method.GET);
+			client.ExecuteAsync(request)
+				.Then(response => {
+					if (response.IsSuccess()) {
+						try {
+							var obj = JsonUtility.FromJson<NearbySearchResponse>(response.Content);
+							onResult.TryInvoke(obj);
+						}
+						catch (Exception e) {
+							onException.TryInvoke(e);
+						}
+					}
+					else
+						onException.TryInvoke(response.GetException());
+				})
+				.Catch(exception => {
+					onException.TryInvoke(exception);
+				});
 		}
 
 		/// <summary>
 		/// Send the API request and return a promise for the response
 		/// </summary>
-		public IPromise<NearbySearchResponse> Send() {
+		public IPromise<NearbySearchResponse> Send(Location location) {
 			var promise = new Promise<NearbySearchResponse>();
 			Send(
+				location,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
@@ -139,33 +172,6 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// INNER METHODS
 		// ================================================
-		IEnumerator SendAsync(Action<NearbySearchResponse> onResult, Action<Exception> onException) {
-			string url;
-			try {
-				url = GetURL();
-			}
-			catch (Exception e) {
-				onException(e);
-				yield break;
-			}
-
-			WWW request = new WWW(url);
-			yield return request;
-
-			if (!string.IsNullOrEmpty(request.error)) {
-				onException(new Exception(request.error + request.text));
-				yield break;
-			}
-			else {
-				try {
-					onResult(JsonUtility.FromJson<NearbySearchResponse>(request.text));
-				}
-				catch (Exception e) {
-					onException(e);
-				}
-			}
-		}
-
 		string RankByToString(RankBy rankBy) {
 			switch (rankBy) {
 				case RankBy.Distance:

@@ -1,6 +1,6 @@
 ﻿using Adrenak.Unex;
-using System.Collections;
 using System;
+using RestSharp;
 using System.Text;
 using UnityEngine;
 
@@ -62,6 +62,9 @@ namespace Adrenak.UniMap {
 		// ================================================
 		// PUBLIC METHODS
 		// ================================================
+		public TextSearchRequest(string key) {
+			this.key = key;
+		}
 
 		/// <summary>
 		/// Gets the request URL for the set parameters
@@ -108,52 +111,53 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// Send the API request and returns the response or exception
 		/// </summary>
+		/// <param name="query">The  query for the search</param>
+		/// <param name="radius">The radius from the location within which the results should be returned</param>
 		/// <param name="onResponse">Action that returns the response as a c# object</param>
 		/// <param name="onException">Action that returns the exception encountered in case of an error</param>
-		public void Send(Action<TextSearchResponse> onResponse, Action<Exception> onException) {
-			CoroutineRunner.Instance.StartCoroutine(SendAsync(onResponse, onException));
-		}
-
-		/// <summary>
-		/// Sends the API request and returns a promise for the response
-		/// </summary>
-		public IPromise<TextSearchResponse> Send() {
-			var promise = new Promise<TextSearchResponse>();
-			Send(
-				result => promise.Resolve(result),
-				exception => promise.Reject(exception)
-			);
-			return promise;
-		}
-
-		// ================================================
-		// INNER METHODS
-		// ================================================
-		IEnumerator SendAsync(Action<TextSearchResponse> onResponse, Action<Exception> onException) {
-			string url;
+		public void Send(string query, int radius, Action<TextSearchResponse> onResponse, Action<Exception> onException) {
+			string url = string.Empty;
 			try {
 				url = GetURL();
 			}
 			catch (Exception e) {
 				onException(e);
-				yield break;
 			}
 
-			WWW request = new WWW(url);
-			yield return request;
+			var client = new RestClient();
+			var request = new RestRequest(url, Method.GET);
+			client.ExecuteAsync(request)
+				.Then(response => {
+					if (response.IsSuccess()) {
+						try {
+							var result = JsonUtility.FromJson<TextSearchResponse>(response.Content);
+							onResponse.TryInvoke(result);
+						}
+						catch (Exception e) {
+							onException.TryInvoke(e);
+						}
+					}
+					else
+						onException.TryInvoke(response.GetException());
+				})
+				.Catch(exception => {
+					onException.TryInvoke(exception);
+				});
+		}
 
-			if (!string.IsNullOrEmpty(request.error)) {
-				onException(new Exception(request.error + request.text));
-				yield break;
-			}
-			else {
-				try {
-					onResponse(JsonUtility.FromJson<TextSearchResponse>(request.text));
-				}
-				catch (Exception e) {
-					onException(e);
-				}
-			}
+		/// <summary>
+		/// Sends the API request and returns a promise for the response
+		/// </summary>
+		/// <param name="query">The  query for the search</param>
+		/// <param name="radius">The radius from the location within which the results should be returned</param>
+		public IPromise<TextSearchResponse> Send(string query, int radius) {
+			var promise = new Promise<TextSearchResponse>();
+			Send(
+				query, radius,
+				result => promise.Resolve(result),
+				exception => promise.Reject(exception)
+			);
+			return promise;
 		}
 	}
 }
