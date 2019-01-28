@@ -48,7 +48,7 @@ namespace Adrenak.UniMap {
 
 			if (m_Texture != null)
 				MonoBehaviour.Destroy(m_Texture);
-			m_Texture = new Texture2D((int)uRes.x, (int)uRes.y, TextureFormat.RGB565, false);
+			m_Texture = new Texture2D((int)uRes.x, (int)uRes.y, TextureFormat.RGB24, false);
 
 			m_Handles.Clear();
 
@@ -69,10 +69,7 @@ namespace Adrenak.UniMap {
 
 							StitchTexture(tile, size, x, ((int)count.y - 1) - y);
 							if (all == total) {
-#if UNITY_ANDROID
-								if(size == PanoSize.VeryLarge)
-									m_Texture.Apply();
-#endif
+								Debug.Log("done");
 								CropTexture(size);
 								onResult.TryInvoke(m_Texture);
 								OnLoaded.TryInvoke(m_Texture);
@@ -88,6 +85,7 @@ namespace Adrenak.UniMap {
 							}
 
 							if (all == total) {
+								Debug.Log("done");
 								CropTexture(size);
 								onResult.TryInvoke(m_Texture);
 								OnLoaded.TryInvoke(m_Texture);
@@ -138,9 +136,9 @@ namespace Adrenak.UniMap {
 			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET), ref handle)
 				.Then(response => {
 					if (!m_Running) return;
-					Dispatcher.Instance.Enqueue(() => {
+					Dispatcher.Add(() => {
 						if (response.IsSuccess()) {
-							var tile = new Texture2D(2, 2, TextureFormat.RGB565, false);
+							var tile = new Texture2D(2, 2, TextureFormat.RGB24, false);
 							tile.LoadImage(response.RawBytes);
 							onResult.TryInvoke(tile);
 						}
@@ -180,12 +178,12 @@ namespace Adrenak.UniMap {
 
 			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET))
 				.Then(response => {
-					Dispatcher.Instance.Enqueue(() => {
+					Dispatcher.Add(() => {
 						result.TryInvoke(response.IsSuccess());
 					});
 				})
 				.Catch(exception => {
-					Dispatcher.Instance.Enqueue(() => {
+					Dispatcher.Add(() => {
 						result.TryInvoke(false);
 					});
 				});
@@ -218,13 +216,13 @@ namespace Adrenak.UniMap {
 		// Texture2D.Crop, which is slower than Graphics.CopyTexture and is a last resort
 		void CropTexture(PanoSize level) {
 			var uRes = PanoUtility.GetUntrimmedResolution(level);
-			var tRes = PanoUtility.GetTrimmedResolution(level);
+			var tRes = PanoUtility.DetectTrimmedResolution(m_Texture);
 
 			if (level != PanoSize.VeryLarge) {
-				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB565, false);
+				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB24, false);
 				Graphics.CopyTexture(m_Texture, 0, 0,
 					0,
-					(int)(uRes.y - tRes.y),
+					(int)uRes.y - (int)tRes.y,
 					(int)tRes.x,
 					(int)tRes.y,
 					trimmed, 0, 0, 0, 0
@@ -238,7 +236,7 @@ namespace Adrenak.UniMap {
 				MonoBehaviour.Destroy(m_Texture);
 				m_Texture = trimmed;
 #else
-				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB565, false);
+				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB24, false);
 				Graphics.CopyTexture(m_Texture, 0, 0,
 					0,
 					(int)(uRes.y - tRes.y),

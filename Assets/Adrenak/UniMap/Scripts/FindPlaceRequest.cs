@@ -195,19 +195,21 @@ namespace Adrenak.UniMap {
 			client.ExecuteAsync(request)
 				.Then(response => {
 					if (response.IsSuccess()) {
-						try {
-							var result = JsonUtility.FromJson<FindPlaceResponse>(response.Content);
-							onResult.TryInvoke(result);
-						}
-						catch (Exception e) {
-							onException.TryInvoke(e);
-						}
+						Dispatcher.Add(() => {
+							try {
+								var result = JsonUtility.FromJson<FindPlaceResponse>(response.Content);
+								onResult.TryInvoke(result);
+							}
+							catch (Exception e) {
+								onException.TryInvoke(e);
+							}
+						});
 					}
 					else
-						onException.TryInvoke(response.GetException());
+						Dispatcher.Add(() => onException.TryInvoke(response.GetException()));
 				})
 				.Catch(exception => {
-					onException.TryInvoke(exception);
+					Dispatcher.Add(() => onException.TryInvoke(exception));
 				});
 		}
 

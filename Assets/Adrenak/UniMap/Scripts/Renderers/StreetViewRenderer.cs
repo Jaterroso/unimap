@@ -10,8 +10,6 @@ namespace Adrenak.UniMap {
 		Material material;
 
 		public void Start() {
-			Dispatcher.Instance.Init();
-
 			material = new Material(Shader.Find("Adrenak/Unlit/Cubemap"));
 			int c = 0;
 			downloader.OnFaceTextureDownloaded += delegate (StreetView.Face face, Texture2D tex) {

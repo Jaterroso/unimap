@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Adrenak.UniMap {
 	public class PanoExample : MonoBehaviour {
 		public PanoRenderer view;
-		public List<string> urls;
+		public List<string> ids;
 		public float delay;
 		public PanoSize size;
 
@@ -13,8 +13,7 @@ namespace Adrenak.UniMap {
 			UniMapInitializer.Setup();
 
 			while (true) {
-				foreach (var url in urls) {
-					var id = PanoUtility.GetIDFromURL(url);
+				foreach (var id in ids) {
 					view.pano.Download(id, size);
 					yield return new WaitForSeconds(delay);
 				}

@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using Adrenak.Unex;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Adrenak.UniMap {
 	public static class PanoUtility {
@@ -11,9 +14,9 @@ namespace Adrenak.UniMap {
 				case PanoSize.Medium:
 					return new Vector2(2048, 1024);
 				case PanoSize.Large:
-					return new Vector2(3584, 2048);
+					return new Vector2(4096, 2048);
 				case PanoSize.VeryLarge:
-					return new Vector2(6656, 4096);
+					return new Vector2(8192, 4096);
 				default:
 					return Vector2.zero;
 			}
@@ -70,29 +73,32 @@ namespace Adrenak.UniMap {
 				case PanoSize.Medium:
 					return new Vector2(4, 2);
 				case PanoSize.Large:
-					return new Vector2(7, 4);
+					return new Vector2(8, 4);
 				case PanoSize.VeryLarge:
-					return new Vector2(13, 8);
+					return new Vector2(16, 8);
 				default:
 					return Vector2.zero;
 			}
 		}
 
-		public static Vector2 GetTrimmedResolution(PanoSize level) {
-			switch (level) {
-				case PanoSize.VerySmall:
-					return new Vector2(416, 208);
-				case PanoSize.Small:
-					return new Vector2(832, 416);
-				case PanoSize.Medium:
-					return new Vector2(1664, 832);
-				case PanoSize.Large:
-					return new Vector2(3328, 1664);
-				case PanoSize.VeryLarge:
-					return new Vector2(6656, 3328);
-				default:
-					return new Vector2(0, 0);
+		/// <summary>
+		/// Calculates the dimensions to which the texture
+		/// should be trimmed to make it seamless
+		/// </summary>
+		/// <param name="texture">The texture to be process</param>
+		/// <returns>The dimensions to which the texture should be cropped</returns>
+		public static Vector2 DetectTrimmedResolution(Texture2D texture) {
+			int height = texture.height;
+			for (int i = texture.height; i > 0; i--) {
+				var first = texture.GetPixel(100, texture.height - i);
+				Debug.Log(first);
+				
+				if(first.r != first.g || first.g != first.b || first.b != first.r) {
+					height = i;
+					return new Vector2(height * 2, height);
+				}
 			}
+			return new Vector2(height * 2, height);
 		}
 
 		public static string GetIDFromURL(string url) {

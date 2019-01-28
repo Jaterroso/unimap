@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
 using UnityEngine;
-using System.Net.Security;
+using Adrenak.Unex;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Collections;
 using System.Collections.Generic;
+using RestSharp;
 
 namespace Adrenak.UniMap {
 	[Serializable]
@@ -57,33 +56,40 @@ namespace Adrenak.UniMap {
 			DownloadFace(StreetView.Face.Left);
 			DownloadFace(StreetView.Face.Right);
 		}
-		
+
 		/// <summary>
 		/// Downloads a single face texture
 		/// </summary>
 		/// <param name="face"></param>
 		public void DownloadFace(StreetView.Face face) {
-			using (WebClient client = new WebClient()) {
-				client.DownloadDataCompleted += delegate (object sender, DownloadDataCompletedEventArgs e) {
-					if (m_Disposed) return;
-					Dispatcher.Instance.Enqueue(() => {
-						if (e.Error == null) {
-							var tex = new Texture2D(1, 1);
-							tex.LoadImage(e.Result, false);
+			var url = GetURL(face);
+			var client = new RestClient();
+			var request = new RestRequest(url);
+			client.ExecuteAsync(request)
+				.Then(response => {
+					Dispatcher.Add(() => {
+						if (m_Disposed) return;
+						if (response.IsSuccess()) {
+							var tex = new Texture2D(1, 1, TextureFormat.RGB565, false);
+							tex.LoadImage(response.RawBytes, false);
 							tex.Apply();
 							SetFaceTexture(face, tex);
 							if (OnFaceTextureDownloaded != null) OnFaceTextureDownloaded(face, tex);
 						}
 						else {
-							if (OnFaceTextureFailed != null) OnFaceTextureFailed(face, e.Error.ToString());
+							if (OnFaceTextureFailed != null)
+								OnFaceTextureFailed(face, response.GetException().ToString());
 						}
 					});
-				};
-				var url = GetURL(face);
-				client.DownloadDataAsync(new Uri(url));
-			}
+				})
+				.Catch(exception => {
+					Dispatcher.Add(() => {
+						if (m_Disposed) return;
+						OnFaceTextureFailed(face, exception.ToString());
+					});
+				});
 		}
-		
+
 		/// <summary>
 		/// Gets the request URL for the given face given the API parameters.
 		/// </summary>
@@ -139,7 +145,7 @@ namespace Adrenak.UniMap {
 			else
 				textures.Add(face, texture);
 		}
-		
+
 		public void Dispose() {
 			m_Disposed = true;
 

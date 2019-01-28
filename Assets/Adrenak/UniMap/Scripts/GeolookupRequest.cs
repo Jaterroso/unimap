@@ -75,17 +75,21 @@ namespace Adrenak.UniMap {
 
 			client.ExecuteAsync(request, (response, handle) => {
 				if (response.IsSuccess()) {
-					var model = JsonUtility.FromJson<GeolookupResponse>(response.Content);
-					if (model != null)
-						onSuccess.TryInvoke(model);
-					else {
-						var exception = new Exception("Could not deserialize", response.GetException());
-						onFailure.TryInvoke(exception);
-					}
+					Dispatcher.Add(() => {
+						var model = JsonUtility.FromJson<GeolookupResponse>(response.Content);
+						if (model != null)
+							onSuccess.TryInvoke(model);
+						else {
+							var exception = new Exception("Could not deserialize", response.GetException());
+							onFailure.TryInvoke(exception);
+						}
+					});
 				}
 				else {
-					var exception = new Exception("Unsuccessful response for Geolookup", response.GetException());
-					onFailure.TryInvoke(exception);
+					Dispatcher.Add(() => {
+						var exception = new Exception("Unsuccessful response for Geolookup", response.GetException());
+						onFailure.TryInvoke(exception);
+					});
 				}
 			});
 		}

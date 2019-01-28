@@ -105,16 +105,18 @@ namespace Adrenak.UniMap {
 			var request = new RestRequest(url, Method.GET);
 			client.ExecuteAsync(request)
 				.Then(response => {
-					if (response.IsSuccess()) {
-						var tex = new Texture2D(1, 1, Format, IsMipMapped);
-						tex.LoadImage(response.RawBytes);
-						onResult.TryInvoke(tex);
-					}
-					else
-						onException.TryInvoke(response.GetException());
+					Dispatcher.Add(() => {
+						if (response.IsSuccess()) {
+							var tex = new Texture2D(1, 1, Format, IsMipMapped);
+							tex.LoadImage(response.RawBytes);
+							onResult.TryInvoke(tex);
+						}
+						else
+							onException.TryInvoke(response.GetException());
+					});
 				})
 				.Catch(exception => {
-					onException.TryInvoke(exception);
+					Dispatcher.Add(() => onException.TryInvoke(exception));
 				});
 		}
 	}

@@ -190,6 +190,28 @@ namespace Adrenak.Unex {
 			return new Color(avg.x, avg.y, avg.z, 1);
 		}
 
+		public static bool SameAs(this Color c1, Color c2) {
+			return
+				c1.r == c2.r && c1.g == c2.g && c1.b == c2.g && c1.a == c2.a;
+		}
+
+		public static Color Minus(this Color c1, Color c2) {
+			return new Color(
+				Mathf.Abs(c1.r - c2.r),
+				Mathf.Abs(c1.g - c2.g),
+				Mathf.Abs(c1.b - c2.b),
+				Mathf.Abs(c1.a - c2.a)
+			);
+		}
+
+		public static float Magnitude(this Color c) {
+			return (c.r + c.g + c.b + c.a) / 4;
+		}
+
+		public static bool SimilarTo(this Color c1, Color c2, float margin) {
+			return c1.Minus(c2).Magnitude() < margin;
+		}
+
 		public static Texture2D Crop(this Texture2D tex, Rect rect) {
 			var w = tex.width;
 			var h = tex.height;

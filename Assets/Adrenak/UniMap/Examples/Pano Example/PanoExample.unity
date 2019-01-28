@@ -178,12 +178,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   view: {fileID: 258535235}
-  urls:
-  - https://www.google.com/maps/@43.0960663,-89.4959714,3a,75y,45.45h,90t/data=!3m8!1e1!3m6!1sAF1QipM2cLZ6EHLnrUyIXRIJ_iJXJXNRnv1ZUtiy9PfV!2e10!3e11!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipM2cLZ6EHLnrUyIXRIJ_iJXJXNRnv1ZUtiy9PfV%3Dw203-h100-k-no-pi-0-ya123.42701-ro-0-fo100!7i6000!8i3000
-  - https://www.google.com/maps/@48.8585029,2.2929863,2a,75y,120.91h,121.89t/data=!3m7!1e1!3m5!1s2kGQvu4QaKWnEHv5S6zIng!2e0!6s%2F%2Fgeo1.ggpht.com%2Fcbk%3Fpanoid%3D2kGQvu4QaKWnEHv5S6zIng%26output%3Dthumbnail%26cb_client%3Dmaps_sv.tactile.gps%26thumb%3D2%26w%3D203%26h%3D100%26yaw%3D293.9551%26pitch%3D0%26thumbfov%3D100!7i13312!8i6656
-  - https://www.google.com/maps/@27.1752613,78.0414775,3a,75y,111.2h,105.67t/data=!3m8!1e1!3m6!1sAF1QipNO02fEYvpJem_ZEZ-tPWWU3pGksLJoWHyMbpMJ!2e10!3e11!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipNO02fEYvpJem_ZEZ-tPWWU3pGksLJoWHyMbpMJ%3Dw203-h100-k-no-pi-0-ya143.08063-ro-0-fo100!7i10240!8i5120
+  ids:
+  - zUOAGe4MIYnvxzGAhYslZQ
+  - HMqbuYhI_GfX4omyKeQ37Q
   delay: 25
-  size: 4
+  size: 3
 --- !u!1 &610995190
 GameObject:
   m_ObjectHideFlags: 0

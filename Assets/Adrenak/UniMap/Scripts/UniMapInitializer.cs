@@ -6,9 +6,7 @@ using System;
 namespace Adrenak.UniMap {
 	public static class UniMapInitializer {
 		public static void Setup() {
-			Dispatcher.Instance.Init();
-
-			CoroutineRunner.Instance.Create();
+			Dispatcher.Create();
 
 			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => {
 				bool isOk = true;
