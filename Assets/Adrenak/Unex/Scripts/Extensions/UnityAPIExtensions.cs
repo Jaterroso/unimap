@@ -190,7 +190,7 @@ namespace Adrenak.Unex {
 			return new Color(avg.x, avg.y, avg.z, 1);
 		}
 
-		public static bool SameAs(this Color c1, Color c2) {
+		public static bool IsSameAs(this Color c1, Color c2) {
 			return
 				c1.r == c2.r && c1.g == c2.g && c1.b == c2.g && c1.a == c2.a;
 		}

@@ -15,8 +15,12 @@ namespace Adrenak.UniMap {
 		public static Location operator +(Location lhs, Location rhs) {
 			return new Location(
 				rhs.lat + lhs.lat,
-				lhs.lng + lhs.lng
+				rhs.lng + lhs.lng
 			);
+		}
+
+		public override string ToString() {
+			return "Location (" + lat + ", " + lng + ")";
 		}
 	}
 
@@ -164,7 +168,7 @@ namespace Adrenak.UniMap {
 		public PlusCode plus_code;
 		public List<string> types;
 	}
-	
+
 	[Serializable]
 	public class GeolookUpResult {
 		public List<AddressComponent> address_components;
