@@ -48,44 +48,54 @@ namespace Adrenak.UniMap {
 
 			if (m_Texture != null)
 				MonoBehaviour.Destroy(m_Texture);
-			m_Texture = new Texture2D((int)uRes.x, (int)uRes.y, TextureFormat.RGB24, false);
+			m_Texture = new Texture2D((int)uRes.x, (int)uRes.y, TextureFormat.RGB565, false);
 
 			m_Handles.Clear();
 
 			var count = PanoUtility.GetTileCount(size);
 
-			int total = (int)count.x * (int)count.y;
-			int all = 0;
-			int failed = 0;
+			int xCount = (int)count.x;
+			int yCount = (int)count.y;
 
-			for (int i = 0; i < (int)count.x; i++) {
-				for (int j = 0; j < (int)count.y; j++) {
+			int req = xCount * yCount;
+			int success = 0;
+			int failed = 0;
+			bool done = false;
+
+			for (int i = 0; i < xCount; i++) {
+				for (int j = 0; j < yCount; j++) {
 					var x = i;
 					var y = j;
 
 					DownloadTile(panoID, x, y, size)
 						.Then(tile => {
-							all++;
-
+							success++;
 							StitchTexture(tile, size, x, ((int)count.y - 1) - y);
-							if (all == total) {
-								Debug.Log("done");
+							
+							if (success == req) {
+								done = true;
 								CropTexture(size);
 								onResult.TryInvoke(m_Texture);
 								OnLoaded.TryInvoke(m_Texture);
 							}
 						})
 						.Catch(exception => {
-							all++;
-							failed++;
+							if (x == 0 && yCount > y) {
+								yCount = y;
+								req = xCount * yCount;
+							}
+							if (y == 0 && xCount > x) {
+								xCount = x;
+								req = xCount * yCount;
+							}
 
-							if (failed == total) {
+							failed++;
+							if (failed == req) {
 								onException(new Exception("Could not download the pano image. ID or URL is incorrect."));
 								return;
 							}
-
-							if (all == total) {
-								Debug.Log("done");
+							if (success == req && !done) {
+								done = true;
 								CropTexture(size);
 								onResult.TryInvoke(m_Texture);
 								OnLoaded.TryInvoke(m_Texture);
@@ -138,7 +148,7 @@ namespace Adrenak.UniMap {
 					if (!m_Running) return;
 					Dispatcher.Add(() => {
 						if (response.IsSuccess()) {
-							var tile = new Texture2D(2, 2, TextureFormat.RGB24, false);
+							var tile = new Texture2D(2, 2, TextureFormat.RGB565, false);
 							tile.LoadImage(response.RawBytes);
 							onResult.TryInvoke(tile);
 						}
@@ -172,7 +182,7 @@ namespace Adrenak.UniMap {
 				+ "&panoid=" + panoID
 				+ "&output=tile"
 				+ "&x=0"
-				+ "&y=0" 
+				+ "&y=0"
 				+ "&zoom=" + 0
 				+ "&nbt&fover=2";
 
@@ -200,7 +210,7 @@ namespace Adrenak.UniMap {
 			}
 			else {
 #if UNITY_ANDROID
-				m_Texture.Copy(tile, new Vector2(x, y) * 512, false);
+				m_Texture.CopyFrom(tile, new Vector2(x, y) * 512, false);
 #elif UNITY_EDITOR || UNITY_STANDALONE
 				Graphics.CopyTexture(tile, 0, 0, 0, 0, tile.width, tile.height, m_Texture, 0, 0, x * tile.width, y * tile.height);
 #else
@@ -217,9 +227,13 @@ namespace Adrenak.UniMap {
 		void CropTexture(PanoSize level) {
 			var uRes = PanoUtility.GetUntrimmedResolution(level);
 			var tRes = PanoUtility.DetectTrimmedResolution(m_Texture);
+			
+			// If the trimmed resolutionm is the same as untrimmed, we don't need to 
+			if (tRes.x == uRes.x && tRes.y == uRes.y) 
+				return;
 
 			if (level != PanoSize.VeryLarge) {
-				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB24, false);
+				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB565, false);
 				Graphics.CopyTexture(m_Texture, 0, 0,
 					0,
 					(int)uRes.y - (int)tRes.y,
@@ -236,7 +250,7 @@ namespace Adrenak.UniMap {
 				MonoBehaviour.Destroy(m_Texture);
 				m_Texture = trimmed;
 #else
-				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB24, false);
+				var trimmed = new Texture2D((int)tRes.x, (int)tRes.y, TextureFormat.RGB565, false);
 				Graphics.CopyTexture(m_Texture, 0, 0,
 					0,
 					(int)(uRes.y - tRes.y),

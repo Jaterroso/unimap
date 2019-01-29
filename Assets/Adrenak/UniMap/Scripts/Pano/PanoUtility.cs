@@ -90,12 +90,13 @@ namespace Adrenak.UniMap {
 		public static Vector2 DetectTrimmedResolution(Texture2D texture) {
 			int height = texture.height;
 			for (int i = texture.height; i > 0; i--) {
-				var first = texture.GetPixel(100, texture.height - i);
-				Debug.Log(first);
-				
-				if(first.r != first.g || first.g != first.b || first.b != first.r) {
-					height = i;
-					return new Vector2(height * 2, height);
+				Color first = texture.GetPixel(0, texture.height - i);
+				for (int j = 1; j < 10; j++) {
+					var curr = texture.GetPixel(j, texture.height - i);
+					if(!first.SimilarTo(curr, .001f)) {
+						height = i;
+						return new Vector2(height * 2, height);
+					}
 				}
 			}
 			return new Vector2(height * 2, height);

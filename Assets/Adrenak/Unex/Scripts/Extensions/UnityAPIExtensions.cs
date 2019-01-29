@@ -229,13 +229,13 @@ namespace Adrenak.Unex {
 				}
 			}
 
-			var result = new Texture2D((int)rect.width, (int)rect.height, tex.format, tex.mipmapCount > 0);
+			var result = new Texture2D((int)rect.width, (int)rect.height, tex.format, true);
 			result.SetPixels32(colors);
 			result.Apply();
 			return result;
 		}
 
-		public static void Copy(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {
+		public static void CopyFrom(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {
 			var pixels = other.GetPixels32();
 			var w = other.width;
 			var h = other.height;
@@ -243,6 +243,7 @@ namespace Adrenak.Unex {
 			tex.SetPixels32((int)position.x, (int)position.y, w, h, pixels);
 			if(apply)
 				tex.Apply();
+			pixels = null;
 		}
 
 		public static float GetGreyscale(this Color32 color) {

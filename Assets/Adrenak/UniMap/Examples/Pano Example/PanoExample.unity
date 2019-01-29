@@ -179,10 +179,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   view: {fileID: 258535235}
   ids:
+  - HMqbuYhI_GfX4omyKeQ37Q
   - zUOAGe4MIYnvxzGAhYslZQ
   - HMqbuYhI_GfX4omyKeQ37Q
-  delay: 25
-  size: 3
+  - zUOAGe4MIYnvxzGAhYslZQ
+  delay: 50
+  size: 4
 --- !u!1 &610995190
 GameObject:
   m_ObjectHideFlags: 0
