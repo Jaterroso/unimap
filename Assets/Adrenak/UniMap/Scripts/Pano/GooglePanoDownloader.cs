@@ -210,7 +210,7 @@ namespace Adrenak.UniMap {
 			}
 			else {
 #if UNITY_ANDROID
-				m_Texture.CopyFrom(tile, new Vector2(x, y) * 512, false);
+				m_Texture.Copy(tile, new Vector2(x, y) * 512, false);
 #elif UNITY_EDITOR || UNITY_STANDALONE
 				Graphics.CopyTexture(tile, 0, 0, 0, 0, tile.width, tile.height, m_Texture, 0, 0, x * tile.width, y * tile.height);
 #else

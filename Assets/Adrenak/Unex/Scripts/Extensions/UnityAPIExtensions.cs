@@ -235,7 +235,7 @@ namespace Adrenak.Unex {
 			return result;
 		}
 
-		public static void CopyFrom(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {
+		public static void Copy(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {
 			var pixels = other.GetPixels32();
 			var w = other.width;
 			var h = other.height;
