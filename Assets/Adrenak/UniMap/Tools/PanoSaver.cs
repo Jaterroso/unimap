@@ -24,8 +24,8 @@ namespace Adrenak.UniMap {
 						var dir = Path.Combine(Application.dataPath.Replace("Assets", ""), "SavedPanos");
 						Directory.CreateDirectory(dir);
 
-						File.WriteAllBytes(Path.Combine(dir, id + ".png"), texture.EncodeToPNG());
-						File.WriteAllBytes(Path.Combine(dir, id + ".jpg"), texture.EncodeToJPG());
+						//File.WriteAllBytes(Path.Combine(dir, id + ".png"), texture.EncodeToPNG());
+						//File.WriteAllBytes(Path.Combine(dir, id + ".jpg"), texture.EncodeToJPG());
 						message.text = "Saved to " + dir;
 					}
 					catch(Exception e) {

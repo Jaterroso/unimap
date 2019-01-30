@@ -8,16 +8,11 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// Invoked everytime a request is finished. Null if the request was not successful
 		/// </summary>
-		public event Action<Texture2D> OnLoaded;
+		public event Action<Texture32> OnLoaded;
 
-		/// <summary>
-		/// Returns the current Panorama Image texture
-		/// </summary>
-		public Texture2D PanoTexture {
-			get { return m_Texture; }
-		}
-		Texture2D m_Texture;
+		public event Action OnStarted;
 
+		Texture32 m_Texture;
 		RestRequestAsyncHandle m_Handle;
 
 		bool m_Running;
@@ -28,8 +23,8 @@ namespace Adrenak.UniMap {
 		/// <param name="id">The Pano ID to be downloaded</param>
 		/// <param name="size">The <see cref="PanoSize"/> of the image to be downloaded</param>
 		/// <returns></returns>
-		public IPromise<Texture2D> Download(string id, PanoSize size) {
-			var promise = new Promise<Texture2D>();
+		public IPromise<Texture32> Download(string id, PanoSize size) {
+			var promise = new Promise<Texture32>();
 			Download(id, size,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
@@ -44,24 +39,25 @@ namespace Adrenak.UniMap {
 		/// <param name="size">The <see cref="PanoSize"/> of the image to be downloaded.</param>
 		/// <param name="onResult">Callback containing the Texture2D of the pano image</param>
 		/// <param name="onException">Callback containing the exception when the download fails</param>
-		public void Download(string panoID, PanoSize size, Action<Texture2D> onResult = null, Action<Exception> onException = null) {
+		public void Download(string panoID, PanoSize size, Action<Texture32> onResult = null, Action<Exception> onException = null) {
 			var width = PanoUtility.GetUserPanoWidth(size);
 			string url = "https://lh5.googleusercontent.com/p/" + panoID + "=w" + width;
 			m_Running = true;
 
-			if (m_Texture != null)
-				MonoBehaviour.Destroy(m_Texture);
-
+			OnStarted.TryInvoke();
 			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET), ref m_Handle)
 				.Then(response => {
 					if (!m_Running) return;
 					Dispatcher.Add(() => {
 						if (response.IsSuccess()) {
-							m_Texture = new Texture2D(1, 1, TextureFormat.RGB565, false);
+							var texture = new Texture2D(1, 1, TextureFormat.RGB565, true);
+							texture.LoadImage(response.RawBytes);
+							var result = Texture32.FromTexture2D(texture);
+							MonoBehaviour.Destroy(texture);
+							texture = null;
 
-							m_Texture.LoadImage(response.RawBytes);
-							onResult.TryInvoke(m_Texture);
-							OnLoaded.TryInvoke(m_Texture);
+							onResult.TryInvoke(result);
+							OnLoaded.TryInvoke(result);
 						}
 						else
 							onException.TryInvoke(response.GetException());
@@ -100,6 +96,7 @@ namespace Adrenak.UniMap {
 					});
 				})
 				.Catch(exception => {
+					Debug.LogError(exception);
 					Dispatcher.Add(() => {
 						result.TryInvoke(false);
 					});
@@ -110,12 +107,15 @@ namespace Adrenak.UniMap {
 		/// Destroys the internal Texture2D
 		/// </summary>
 		public void ClearTexture() {
-			if (m_Texture != null)
-				MonoBehaviour.Destroy(m_Texture);
+			if (m_Texture != null) {
+				m_Texture.Clear();
+				m_Texture = null;
+			}
 		}
 
 		public void Stop() {
 			m_Running = false;
+			ClearTexture();
 			if (m_Handle != null)
 				m_Handle.Abort();
 		}

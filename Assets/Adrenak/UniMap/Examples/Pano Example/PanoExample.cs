@@ -14,7 +14,7 @@ namespace Adrenak.UniMap {
 
 			while (true) {
 				foreach (var id in ids) {
-					view.pano.Download(id, size);
+					view.downloader.Download(id, size);
 					yield return new WaitForSeconds(delay);
 				}
 			}

@@ -229,10 +229,11 @@ namespace Adrenak.Unex {
 				}
 			}
 
-			var result = new Texture2D((int)rect.width, (int)rect.height, tex.format, true);
-			result.SetPixels32(colors);
-			result.Apply();
-			return result;
+			MonoBehaviour.Destroy(tex);
+			tex = new Texture2D((int)rect.width, (int)rect.height, tex.format, true);
+			tex.SetPixels32(colors, 0);
+			tex.Apply();
+			return tex;
 		}
 
 		public static void Copy(this Texture2D tex, Texture2D other, Vector2 position, bool apply = true) {

@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using Adrenak.Unex;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Adrenak.UniMap {
 	public static class PanoUtility {
@@ -33,15 +31,7 @@ namespace Adrenak.UniMap {
 				case PanoSize.Large:
 					return 4096;
 				case PanoSize.VeryLarge:
-#if UNITY_ANDROID && UNIMAP_PANO_FORCE_VERY_LARGE
 					return 8192;
-#elif UNITY_ANDROID && !UNIMAP_PANO_FORCE_VERY_LARGE
-					return 4096;
-#elif UNITY_EDITOR || UNITY_STANDALONE
-					return 8192;
-#else
-					return 4096;
-#endif
 				default:
 					return 1;
 			}
@@ -87,12 +77,12 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="texture">The texture to be process</param>
 		/// <returns>The dimensions to which the texture should be cropped</returns>
-		public static Vector2 DetectTrimmedResolution(Texture2D texture) {
-			int height = texture.height;
-			for (int i = texture.height; i > 0; i--) {
-				Color first = texture.GetPixel(0, texture.height - i);
+		public static Vector2 DetectTrimmedResolution(Texture32 texture) {
+			int height = texture.Height;
+			for (int i = texture.Height; i > 0; i--) {
+				Color first = texture.GetPixel(0, texture.Height - i);
 				for (int j = 1; j < 10; j++) {
-					var curr = texture.GetPixel(j, texture.height - i);
+					var curr = texture.GetPixel(j, texture.Height - i);
 					if(!first.SimilarTo(curr, .001f)) {
 						height = i;
 						return new Vector2(height * 2, height);

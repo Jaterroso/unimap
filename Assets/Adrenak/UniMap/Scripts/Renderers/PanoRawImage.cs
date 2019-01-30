@@ -1,26 +1,24 @@
-﻿using System;
+﻿using UnityEngine;
 using Adrenak.Unex;
-using UnityEngine;
+using UnityEngine.UI;
 
 namespace Adrenak.UniMap {
-	public class PanoRenderer : MonoBehaviour {
+	public class PanoRawImage : MonoBehaviour {
 		public PanoDownloader downloader = new PanoDownloader();
-		public Renderer panoSurface;
+		public RawImage display;
 		Texture2D m_Texture;
 
 		void Awake() {
 			downloader.OnStarted += () => {
-				panoSurface.material.mainTexture = new Color(1, 0, 0, 1).ToPixel();
+				display.material.mainTexture = new Color(1, 0, 0, 1).ToPixel();
 			};
 
 			downloader.OnLoaded += t32 => {
-				if (m_Texture != null) {
+				if (m_Texture != null)
 					MonoBehaviour.Destroy(m_Texture);
-					m_Texture = null;
-					GC.Collect();
-				}
+				m_Texture = null;
 				m_Texture = t32.GetTexture2D(TextureFormat.RGB565);
-				panoSurface.material.mainTexture = m_Texture;
+				display.material.mainTexture = m_Texture;
 			};
 		}
 

@@ -7,7 +7,7 @@ namespace Adrenak.Unex {
 		static Dispatcher m_Instance;
 		Queue<Action> m_Queue = new Queue<Action>();
 
-		public static void Init() {
+		public static void Create() {
 			if (m_Instance != null) return;
 
 			var go = new GameObject("Adrenak.Unex.Dispatcher") {
@@ -17,7 +17,7 @@ namespace Adrenak.Unex {
 			m_Instance = go.AddComponent<Dispatcher>();
 		}
 
-		public static void Enqueue(Action action) {
+		public static void Add(Action action) {
 			lock (m_Instance.m_Queue) {
 				m_Instance.m_Queue.Enqueue(action);
 			}

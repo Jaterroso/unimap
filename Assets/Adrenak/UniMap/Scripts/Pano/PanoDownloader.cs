@@ -8,8 +8,9 @@ namespace Adrenak.UniMap {
 		/// <summary>
 		/// Invoked everytime a request is finished. Null if the request was not successful
 		/// </summary>
-		public event Action<Texture2D> OnLoaded;
-		
+		public event Action<Texture32> OnLoaded;
+		public event Action OnStarted;
+
 		GooglePanoDownloader m_GoogleDownloader;
 		UserPanoDownloader m_UserDownloader;
 
@@ -17,7 +18,10 @@ namespace Adrenak.UniMap {
 			m_UserDownloader = new UserPanoDownloader();
 			m_GoogleDownloader = new GooglePanoDownloader();
 
+			m_UserDownloader.OnStarted += () => OnStarted.TryInvoke();
 			m_UserDownloader.OnLoaded += tex => OnLoaded.TryInvoke(tex);
+
+			m_GoogleDownloader.OnStarted += () => OnStarted.TryInvoke();
 			m_GoogleDownloader.OnLoaded += tex => OnLoaded.TryInvoke(tex);
 		}
 
@@ -26,8 +30,8 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="panoID">The ID of the panorama to be downloaded</param>
 		/// <param name="size">Size of the texture to be downloaded</param>
-		public IPromise<Texture2D> Download(string panoID, PanoSize size) {
-			var promise = new Promise<Texture2D>();
+		public IPromise<Texture32> Download(string panoID, PanoSize size) {
+			var promise = new Promise<Texture32>();
 			Download(panoID, size,
 				texture => promise.Resolve(texture),
 				exception => promise.Reject(exception)
@@ -42,7 +46,7 @@ namespace Adrenak.UniMap {
 		/// <param name="size">Size of the texture to be downloaded</param>
 		/// <param name="onResult">Callback when the download is successful</param>
 		/// <param name="onException">Callback when the download is unsuccessful</param>
-		public void Download(string panoID, PanoSize size, Action<Texture2D> onResult, Action<Exception> onException) {
+		public void Download(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
 			// We first try to download as a Google Pano
 			m_GoogleDownloader.IsAvailable(panoID)
 				.Then(isGooglePano => {
@@ -72,7 +76,7 @@ namespace Adrenak.UniMap {
 				m_UserDownloader.Stop();
 		}
 
-		void GoogleDownload(string panoID, PanoSize size, Action<Texture2D> onResult, Action<Exception> onException) {
+		void GoogleDownload(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
 			if (m_UserDownloader != null) {
 				m_UserDownloader.ClearTexture();
 				m_UserDownloader.Stop();
@@ -80,7 +84,7 @@ namespace Adrenak.UniMap {
 			m_GoogleDownloader.Download(panoID, size, onResult, onException);
 		}
 
-		void UserDownload(string panoID, PanoSize size, Action<Texture2D> onResult, Action<Exception> onException) {
+		void UserDownload(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
 			if (m_GoogleDownloader != null) {
 				m_GoogleDownloader.ClearTexture();
 				m_GoogleDownloader.Stop();
