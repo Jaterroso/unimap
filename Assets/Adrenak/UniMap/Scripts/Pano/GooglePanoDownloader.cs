@@ -12,6 +12,12 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		public event Action<Texture32> OnLoaded;
 
+
+		/// <summary>
+		/// Invoked everytime a request fails.
+		/// </summary>
+		public event Action<Exception> OnFailed;
+
 		/// <summary>
 		/// Invoked when a new download starts
 		/// </summary>
@@ -99,7 +105,9 @@ namespace Adrenak.UniMap {
 
 							failed++;
 							if (failed == req) {
-								onException(new Exception("Could not download the pano image. ID or URL is incorrect."));
+								var thrown = new Exception("Could not download the pano image. ID or URL is incorrect.");
+								OnFailed.TryInvoke(thrown);
+								onException.TryInvoke(thrown);
 								return;
 							}
 							if (success == req && !done) {
