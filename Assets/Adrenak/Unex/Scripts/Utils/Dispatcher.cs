@@ -23,7 +23,7 @@ namespace Adrenak.Unex {
 			}
 		}
 
-		private static void Update() {
+		private void Update() {
 			lock (m_Instance.m_Queue) {
 				while (m_Instance.m_Queue.Count > 0)
 					m_Instance.m_Queue.Dequeue()();

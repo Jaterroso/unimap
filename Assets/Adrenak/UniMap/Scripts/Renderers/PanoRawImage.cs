@@ -10,7 +10,7 @@ namespace Adrenak.UniMap {
 
 		void Awake() {
 			downloader.OnStarted += () => {
-				display.material.mainTexture = new Color(1, 0, 0, 1).ToPixel();
+				display.material.mainTexture = new Color(0, 0, 0, 1).ToPixel();
 			};
 
 			downloader.OnLoaded += t32 => {

@@ -191,8 +191,11 @@ namespace Adrenak.Unex {
 		}
 
 		public static bool IsSameAs(this Color c1, Color c2) {
-			return
-				c1.r == c2.r && c1.g == c2.g && c1.b == c2.g && c1.a == c2.a;
+			return c1.r == c2.r && c1.g == c2.g && c1.b == c2.g && c1.a == c2.a;
+		}
+
+		public static bool IsSameAs(this Color32 c1, Color32 c2) {
+			return c1.r == c2.r && c1.g == c2.g && c1.b == c2.g && c1.a == c2.a;
 		}
 
 		public static Color Minus(this Color c1, Color c2) {
@@ -204,11 +207,28 @@ namespace Adrenak.Unex {
 			);
 		}
 
+		public static Color32 Minus(this Color32 c1, Color32 c2) {
+			return new Color32(
+				(byte)Mathf.Abs(c1.r - c2.r),
+				(byte)Mathf.Abs(c1.g - c2.g),
+				(byte)Mathf.Abs(c1.b - c2.b),
+				(byte)Mathf.Abs(c1.a - c2.a)
+			);
+		}
+
 		public static float Magnitude(this Color c) {
 			return (c.r + c.g + c.b + c.a) / 4;
 		}
 
+		public static float Magnitude(this Color32 c) {
+			return ((float)(c.r + c.g + c.b + c.a)) / 4;
+		}
+
 		public static bool SimilarTo(this Color c1, Color c2, float margin) {
+			return c1.Minus(c2).Magnitude() < margin;
+		}
+
+		public static bool SimilarTo(this Color32 c1, Color32 c2, float margin) {
 			return c1.Minus(c2).Magnitude() < margin;
 		}
 

@@ -48,7 +48,9 @@ namespace Adrenak.UniMap {
 		/// <param name="onException">Callback for exception when the download fails</param>
 		public void Download(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
 			Stop();
-			Runner.AutoRun(DownloadCo(panoID, size, onResult, onException));
+			Dispatcher.Add(() => {
+				Runner.AutoRun(DownloadCo(panoID, size, onResult, onException));
+			});
 		}
 
 		IEnumerator DownloadCo(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
@@ -210,7 +212,11 @@ namespace Adrenak.UniMap {
 		// Texture2D.Crop, which is slower than Graphics.CopyTexture and is a last resort
 		void CropTexture(PanoSize level) {
 			var uRes = PanoUtility.GetUntrimmedResolution(level);
-			var tRes = PanoUtility.DetectTrimmedResolution(m_Texture);
+			var tRes = PanoUtility.DetectBlankBands(m_Texture);
+			tRes = new Vector2(
+				PanoUtility.DetectWidth(m_Texture),
+				tRes.y
+			);
 
 			// If the trimmed resolutionm is the same as untrimmed, we don't need to 
 			if (tRes.x == uRes.x && tRes.y == uRes.y) 

@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
 using Adrenak.Unex;
 
 namespace Adrenak.UniMap {
@@ -71,25 +73,66 @@ namespace Adrenak.UniMap {
 			}
 		}
 
-		/// <summary>
-		/// Calculates the dimensions to which the texture
-		/// should be trimmed to make it seamless
-		/// </summary>
-		/// <param name="texture">The texture to be process</param>
-		/// <returns>The dimensions to which the texture should be cropped</returns>
-		public static Vector2 DetectTrimmedResolution(Texture32 texture) {
+		public static Vector2 DetectBlankBands(Texture32 texture) {
+			Color32 first;
+
 			int height = texture.Height;
-			for (int i = texture.Height; i > 0; i--) {
-				Color first = texture.GetPixel(0, texture.Height - i);
+			for (int i = 0; i < texture.Height; i++) {
+				first = texture.GetPixel(0, i);
 				for (int j = 1; j < 10; j++) {
-					var curr = texture.GetPixel(j, texture.Height - i);
-					if(!first.SimilarTo(curr, .001f)) {
-						height = i;
-						return new Vector2(height * 2, height);
+					var curr = texture.GetPixel(j, i);
+					if (!first.SimilarTo(curr, 3)) {
+						height = texture.Height - i;
+						goto width;
 					}
 				}
 			}
-			return new Vector2(height * 2, height);
+
+			width:
+
+			int width = texture.Width;
+			for (int i = texture.Width - 1; i > 0; i--) {
+				first = texture.GetPixel(i, 0);
+				for (int j = 1; j < 10; j++) {
+					var curr = texture.GetPixel(i, texture.Height - j);
+					if (!first.SimilarTo(curr, 3)) {
+						width = i;
+						goto done;
+					}
+				}
+			}
+
+			done:
+			return new Vector2(width, height);
+		}
+
+		public static int DetectWidth(Texture32 texture) {
+			int width = texture.Width;
+			List<float> deltas = new List<float>();
+
+			for (int i = texture.Width - 1; i > texture.Width / 2; i--) {
+				float sum = 0;
+				for (int j = 0; j < texture.Height; j += 8) {
+					var reff = texture.GetPixel(0, texture.Height - 1 - j);
+					var curr = texture.GetPixel(i, texture.Height - 1 - j);
+					sum += reff.Minus(curr).Magnitude();
+				}
+				deltas.Add(sum);
+			}
+
+			float min = deltas[0];
+			for(int i = 1; i < deltas.Count; i++) {
+				if (min > deltas[i])
+					min = deltas[i];
+			}
+
+			for (int i = 0; i < deltas.Count; i++) {
+				var f = deltas[i];
+				if (f.Approximately(min)) {
+					return texture.Width - i;
+				}
+			}
+			return width;
 		}
 
 		public static string GetIDFromURL(string url) {
