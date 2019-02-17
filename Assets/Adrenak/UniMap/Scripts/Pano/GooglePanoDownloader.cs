@@ -36,9 +36,9 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		/// <param name="url">The URL of the pano</param>
 		/// <param name="size">The <see cref="PanoSize"/> of the pano image to be downloaded</param>
-		public IPromise<Texture32> Download(string panoID, PanoSize level) {
+		public IPromise<Texture32> Download(string panoID, PanoSize size, TextureFormat format) {
 			var promise = new Promise<Texture32>();
-			Download(panoID, level,
+			Download(panoID, size, format,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
@@ -52,14 +52,14 @@ namespace Adrenak.UniMap {
 		/// <param name="size">The <see cref="PanoSize"/> of the pano image to be downloaded</param>
 		/// <param name="onResult">Callback for result texture when the download is successful</param>
 		/// <param name="onException">Callback for exception when the download fails</param>
-		public void Download(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
+		public void Download(string panoID, PanoSize size, TextureFormat format, Action<Texture32> onResult, Action<Exception> onException) {
 			Stop();
 			Dispatcher.Add(() => {
-				Runner.AutoRun(DownloadCo(panoID, size, onResult, onException));
+				Runner.AutoRun(DownloadCo(panoID, size, format, onResult, onException));
 			});
 		}
 
-		IEnumerator DownloadCo(string panoID, PanoSize size, Action<Texture32> onResult, Action<Exception> onException) {
+		IEnumerator DownloadCo(string panoID, PanoSize size, TextureFormat format, Action<Texture32> onResult, Action<Exception> onException) {
 			OnStarted.TryInvoke();
 
 			var uRes = PanoUtility.GetUntrimmedResolution(size);
@@ -80,7 +80,7 @@ namespace Adrenak.UniMap {
 					var x = i;
 					var y = j;
 
-					DownloadTile(panoID, x, y, size)
+					DownloadTile(panoID, x, y, size, format)
 						.Then(tile => {
 							success++;
 							StitchTexture(tile, size, x, ((int)count.y - 1) - y);
@@ -122,16 +122,16 @@ namespace Adrenak.UniMap {
 			}
 		}
 
-		IPromise<Texture2D> DownloadTile(string panoID, int x, int y, PanoSize size) {
+		IPromise<Texture2D> DownloadTile(string panoID, int x, int y, PanoSize size, TextureFormat format) {
 			var promise = new Promise<Texture2D>();
-			DownloadTile(panoID, x, y, size,
+			DownloadTile(panoID, x, y, size, format,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
 			return promise;
 		}
 
-		void DownloadTile(string panoID, int x, int y, PanoSize size, Action<Texture2D> onResult = null, Action<Exception> onException = null) {
+		void DownloadTile(string panoID, int x, int y, PanoSize size, TextureFormat format, Action<Texture2D> onResult = null, Action<Exception> onException = null) {
 			m_Running = true;
 
 			var url = "https://geo0.ggpht.com/cbk?cb_client=maps_sv.tactile&authuser=0&hl=en"
@@ -151,7 +151,7 @@ namespace Adrenak.UniMap {
 					if (!m_Running) return;
 					Dispatcher.Add(() => {
 						if (response.IsSuccess()) {
-							var tile = new Texture2D(2, 2, TextureFormat.RGB565, true);
+							var tile = new Texture2D(2, 2, format, true);
 							tile.LoadImage(response.RawBytes);
 							onResult.TryInvoke(tile);
 						}
@@ -209,7 +209,7 @@ namespace Adrenak.UniMap {
 		// called Texture2D.Copy. However Graphics.Copytexture is faster so we use that
 		// wherever possible
 		void StitchTexture(Texture2D tile, PanoSize size, int x, int y) {
-			m_Texture.ReplaceBlock(x * tile.width, y * tile.height, Texture32.FromTexture2D(tile));	
+			m_Texture.ReplaceBlock(x * tile.width, y * tile.height, Texture32.FromTexture2D(tile));
 			MonoBehaviour.Destroy(tile);
 			tile = null;
 		}
@@ -227,9 +227,9 @@ namespace Adrenak.UniMap {
 			);
 
 			// If the trimmed resolutionm is the same as untrimmed, we don't need to 
-			if (tRes.x == uRes.x && tRes.y == uRes.y) 
+			if (tRes.x == uRes.x && tRes.y == uRes.y)
 				return;
-			
+
 			m_Texture.Crop(0, (int)uRes.y - (int)tRes.y, (int)tRes.x, (int)tRes.y);
 		}
 
@@ -246,8 +246,10 @@ namespace Adrenak.UniMap {
 			m_Running = false;
 			ClearTexture();
 			foreach (var handle in m_Handles) {
-				if (handle != null)
+				if (handle != null) {
+					handle.WebRequest.Abort();
 					handle.Abort();
+				}
 			}
 		}
 	}

@@ -8,17 +8,18 @@ namespace Adrenak.UniMap {
 		public InputField urlInput;
 		public Text message;
 		public PanoSize size;
+		public TextureFormat format = TextureFormat.RGB24;
 		PanoDownloader downloader = new PanoDownloader();
 
 		private void Start() {
 			UniMapInitializer.Setup();
 		}
 
-		public void Save () {
+		public void Save() {
 			message.text = "downloading...";
 			var id = PanoUtility.GetIDFromURL(urlInput.text);
 
-			downloader.Download(id, size)
+			downloader.Download(id, size, format)
 				.Then(texture => {
 					try {
 						var dir = Path.Combine(Application.dataPath.Replace("Assets", ""), "SavedPanos");
@@ -28,7 +29,7 @@ namespace Adrenak.UniMap {
 						//File.WriteAllBytes(Path.Combine(dir, id + ".jpg"), texture.EncodeToJPG());
 						message.text = "Saved to " + dir;
 					}
-					catch(Exception e) {
+					catch (Exception e) {
 						message.text = "Erorr saving the pano: " + e;
 					}
 				})

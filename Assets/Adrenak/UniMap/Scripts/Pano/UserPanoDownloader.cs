@@ -10,11 +10,12 @@ namespace Adrenak.UniMap {
 		/// </summary>
 		public event Action<Texture32> OnLoaded;
 
+		public event Action<Exception> OnFailed;
+
 		public event Action OnStarted;
 
 		Texture32 m_Texture;
 		RestRequestAsyncHandle m_Handle;
-
 		bool m_Running;
 
 		/// <summary>
@@ -23,9 +24,9 @@ namespace Adrenak.UniMap {
 		/// <param name="id">The Pano ID to be downloaded</param>
 		/// <param name="size">The <see cref="PanoSize"/> of the image to be downloaded</param>
 		/// <returns></returns>
-		public IPromise<Texture32> Download(string id, PanoSize size) {
+		public IPromise<Texture32> Download(string id, PanoSize size, TextureFormat format) {
 			var promise = new Promise<Texture32>();
-			Download(id, size,
+			Download(id, size, format,
 				result => promise.Resolve(result),
 				exception => promise.Reject(exception)
 			);
@@ -39,7 +40,7 @@ namespace Adrenak.UniMap {
 		/// <param name="size">The <see cref="PanoSize"/> of the image to be downloaded.</param>
 		/// <param name="onResult">Callback containing the Texture2D of the pano image</param>
 		/// <param name="onException">Callback containing the exception when the download fails</param>
-		public void Download(string panoID, PanoSize size, Action<Texture32> onResult = null, Action<Exception> onException = null) {
+		public void Download(string panoID, PanoSize size, TextureFormat format, Action<Texture32> onResult = null, Action<Exception> onException = null) {
 			var width = PanoUtility.GetUserPanoWidth(size);
 			string url = "https://lh5.googleusercontent.com/p/" + panoID + "=w" + width;
 			m_Running = true;
@@ -50,7 +51,7 @@ namespace Adrenak.UniMap {
 					if (!m_Running) return;
 					Dispatcher.Add(() => {
 						if (response.IsSuccess()) {
-							var texture = new Texture2D(1, 1, TextureFormat.RGB565, true);
+							var texture = new Texture2D(1, 1, format, true);
 							texture.LoadImage(response.RawBytes);
 							var result = Texture32.FromTexture2D(texture);
 							MonoBehaviour.Destroy(texture);
@@ -59,8 +60,10 @@ namespace Adrenak.UniMap {
 							onResult.TryInvoke(result);
 							OnLoaded.TryInvoke(result);
 						}
-						else
+						else {
+							OnFailed.TryInvoke(response.GetException());
 							onException.TryInvoke(response.GetException());
+						}
 					});
 				})
 				.Catch(exception => {
