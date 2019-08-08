@@ -89,7 +89,7 @@ namespace Adrenak.UniMap {
 
 			client.ExecuteAsync(request, (response, handle) => {
 				if (response.IsSuccess()) {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						var model = JsonUtility.FromJson<GeocodingResponse>(response.Content);
 					
 						if (model != null)
@@ -101,7 +101,7 @@ namespace Adrenak.UniMap {
 					});
 				}
 				else {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						var exception = new Exception("Unsuccessful response for Geocoding", response.GetException());
 						onFailure.TryInvoke(exception);
 					});

@@ -1,7 +1,7 @@
 ﻿namespace Adrenak.Unex {
 	public static class UnexInitializer {
 		public static void Run() {
-			Dispatcher.Create();
+			Dispatcher.Init();
 			Runner.Init();
 		}
 	}

@@ -128,7 +128,7 @@ namespace Adrenak.UniMap {
 			var request = new RestRequest(url, Method.GET);
 			client.ExecuteAsync(request)
 				.Then(response => {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						if (response.IsSuccess()) {
 							try {
 								var result = JsonUtility.FromJson<TextSearchResponse>(response.Content);
@@ -143,7 +143,7 @@ namespace Adrenak.UniMap {
 					});
 				})
 				.Catch(exception => {
-					Dispatcher.Add(() => onException.TryInvoke(exception));
+					Dispatcher.Enqueue(() => onException.TryInvoke(exception));
 				});
 		}
 

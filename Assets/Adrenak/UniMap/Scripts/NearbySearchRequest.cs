@@ -140,7 +140,7 @@ namespace Adrenak.UniMap {
 			client.ExecuteAsync(request)
 				.Then(response => {
 					if (response.IsSuccess()) {
-						Dispatcher.Add(() => {
+						Dispatcher.Enqueue(() => {
 							try {
 								var obj = JsonUtility.FromJson<NearbySearchResponse>(response.Content);
 								onResult.TryInvoke(obj);
@@ -151,7 +151,7 @@ namespace Adrenak.UniMap {
 						});
 					}
 					else {
-						Dispatcher.Add(() => {
+						Dispatcher.Enqueue(() => {
 							onException.TryInvoke(response.GetException());
 						});
 					}

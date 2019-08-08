@@ -140,19 +140,20 @@ namespace Adrenak.Unex.Ed {
 			// Delete the temp object
 			MonoBehaviour.DestroyImmediate(createdGO);
         }
-        
-        // Deselects all gameobjects. Press ALT + A
-        [MenuItem("Edit/HotKeys/Deselect All &A")]
-        static void DeselectAll() {
-            Selection.activeGameObject = null;
-        }
 
-        // ================================================
-        // uGUI
-        // See uGUITools.cs online
-        // ================================================
-        // Sets the anchors of the RectTransform to it's corner bounds
-        [MenuItem("Edit/HotKeys/Anchors to Corners %[")]
+#if !UNITY_2018
+		[MenuItem("Edit/HotKeys/Deselect All &A")]
+		static void DeselectAll() {
+			Selection.activeGameObject = null;
+		}
+#endif
+
+		// ================================================
+		// uGUI
+		// See uGUITools.cs online
+		// ================================================
+		// Sets the anchors of the RectTransform to it's corner bounds
+		[MenuItem("Edit/HotKeys/Anchors to Corners %[")]
         static void AnchorsToCorners() {
             RectTransform t = Selection.activeTransform as RectTransform;
             RectTransform pt = Selection.activeTransform.parent as RectTransform;
@@ -193,13 +194,13 @@ namespace Adrenak.Unex.Ed {
                     EditorPrefs.SetInt("LockableInspectorIndex", 0);
                 int i = EditorPrefs.GetInt("LockableInspectorIndex");
 
-                Type type = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditor.InspectorWindow");
+                Type type = Assembly.GetAssembly(typeof(UnityEditor.Editor)).GetType("UnityEditor.InspectorWindow");
                 Object[] findObjectsOfTypeAll = Resources.FindObjectsOfTypeAll(type);
                 _mouseOverWindow = (EditorWindow)findObjectsOfTypeAll[i];
             }
 
             if (_mouseOverWindow != null && _mouseOverWindow.GetType().Name == "InspectorWindow") {
-                Type type = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditor.InspectorWindow");
+                Type type = Assembly.GetAssembly(typeof(UnityEditor.Editor)).GetType("UnityEditor.InspectorWindow");
                 PropertyInfo propertyInfo = type.GetProperty("isLocked");
                 bool value = (bool)propertyInfo.GetValue(_mouseOverWindow, null);
                 propertyInfo.SetValue(_mouseOverWindow, !value, null);
@@ -209,7 +210,7 @@ namespace Adrenak.Unex.Ed {
 
         [MenuItem("Edit/HotKeys/Clear Console %&c")]
         static void ClearConsole() {
-            Type type = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditorInternal.LogEntries");
+            Type type = Assembly.GetAssembly(typeof(UnityEditor.Editor)).GetType("UnityEditorInternal.LogEntries");
             type.GetMethod("Clear").Invoke(null, null);
         }
     }

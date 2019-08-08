@@ -75,7 +75,7 @@ namespace Adrenak.UniMap {
 
 			client.ExecuteAsync(request, (response, handle) => {
 				if (response.IsSuccess()) {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						var model = JsonUtility.FromJson<GeolookupResponse>(response.Content);
 						if (model != null)
 							onSuccess.TryInvoke(model);
@@ -86,7 +86,7 @@ namespace Adrenak.UniMap {
 					});
 				}
 				else {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						var exception = new Exception("Unsuccessful response for Geolookup", response.GetException());
 						onFailure.TryInvoke(exception);
 					});

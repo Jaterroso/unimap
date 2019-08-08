@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 namespace Adrenak.UniMap {
 	public static class UniMapInitializer {
 		public static void Setup() {
-			Dispatcher.Create();
+			Dispatcher.Init();
 
 			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => {
 				bool isOk = true;

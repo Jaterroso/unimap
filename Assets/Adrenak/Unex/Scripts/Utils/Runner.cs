@@ -160,6 +160,7 @@ namespace Adrenak.Unex {
 			runner.Run(() => {
 				if (onFinished != null)
 					onFinished();
+				runner.Destroy();
 			});
 			return runner;
 		}
@@ -172,8 +173,10 @@ namespace Adrenak.Unex {
 		public void WaitForSeconds(float seconds, Action action) {
 			Runner runner = AutoRun(WaitForSecondsAsync(seconds));
 			runner.OnStateChange += state => {
-				if (state == State.Finished)
+				if (state == State.Finished) {
 					action();
+					runner.Destroy();
+				}
 			};
 		}
 
@@ -189,7 +192,10 @@ namespace Adrenak.Unex {
 		public Runner WaitWhile(Func<bool> predicate, Action callback) {
 			Runner runner = AutoRun(WaitWhileAsync(predicate, callback));
 			runner.OnStateChange += state => {
-				if (state == State.Finished) if (callback != null) callback();
+				if (state == State.Finished) {
+					if (callback != null) callback();
+					runner.Destroy();
+				}
 			};
 			return runner;
 		}
@@ -212,7 +218,10 @@ namespace Adrenak.Unex {
 		public Runner WaitUntil(Func<bool> predicate, Action callback) {
 			Runner runner = AutoRun(WaitUntilAsync(predicate, callback));
 			runner.OnStateChange += state => {
-				if (state == State.Finished) if (callback != null) callback();
+				if (state == State.Finished) {
+					if (callback != null) callback();
+					runner.Destroy();
+				}
 			};
 			return runner;
 		}
@@ -227,8 +236,10 @@ namespace Adrenak.Unex {
 
 		IEnumerator RunIfAsync(Func<bool> predicate, Action callback) {
 			while (true) {
-				if(predicate())
+				if (predicate()) {
 					callback();
+					Destroy();
+				}
 				yield return null;
 			}
 		}

@@ -54,7 +54,7 @@ namespace Adrenak.UniMap {
 		/// <param name="onException">Callback for exception when the download fails</param>
 		public void Download(string panoID, PanoSize size, TextureFormat format, Action<Texture32> onResult, Action<Exception> onException) {
 			Stop();
-			Dispatcher.Add(() => {
+			Dispatcher.Enqueue(() => {
 				Runner.AutoRun(DownloadCo(panoID, size, format, onResult, onException));
 			});
 		}
@@ -146,10 +146,10 @@ namespace Adrenak.UniMap {
 			m_Handles.Add(handle);
 			var client = new RestClient();
 			var request = new RestRequest(url, Method.GET);
-			client.ExecuteAsync(request, ref handle)
+			client.ExecuteAsync(request, out handle)
 				.Then(response => {
 					if (!m_Running) return;
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						if (response.IsSuccess()) {
 							var tile = new Texture2D(2, 2, format, true);
 							tile.LoadImage(response.RawBytes);
@@ -191,13 +191,13 @@ namespace Adrenak.UniMap {
 
 			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET))
 				.Then(response => {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						result.TryInvoke(response.IsSuccess());
 					});
 				})
 				.Catch(exception => {
 					Debug.LogError(exception);
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						result.TryInvoke(false);
 					});
 				});

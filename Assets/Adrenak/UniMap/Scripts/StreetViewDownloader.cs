@@ -67,7 +67,7 @@ namespace Adrenak.UniMap {
 			var request = new RestRequest(url);
 			client.ExecuteAsync(request)
 				.Then(response => {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						if (m_Disposed) return;
 						if (response.IsSuccess()) {
 							var tex = new Texture2D(1, 1, TextureFormat.RGB565, false);
@@ -83,7 +83,7 @@ namespace Adrenak.UniMap {
 					});
 				})
 				.Catch(exception => {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						if (m_Disposed) return;
 						OnFaceTextureFailed(face, exception.ToString());
 					});

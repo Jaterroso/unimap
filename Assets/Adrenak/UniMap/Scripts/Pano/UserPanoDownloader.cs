@@ -46,10 +46,10 @@ namespace Adrenak.UniMap {
 			m_Running = true;
 
 			OnStarted.TryInvoke();
-			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET), ref m_Handle)
+			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET), out m_Handle)
 				.Then(response => {
 					if (!m_Running) return;
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						if (response.IsSuccess()) {
 							var texture = new Texture2D(1, 1, format, true);
 							texture.LoadImage(response.RawBytes);
@@ -94,13 +94,13 @@ namespace Adrenak.UniMap {
 			string url = "https://lh5.googleusercontent.com/p/" + panoID + "=w" + 1;
 			new RestClient().ExecuteAsync(new RestRequest(url, Method.GET))
 				.Then(response => {
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						result.TryInvoke(response.IsSuccess());
 					});
 				})
 				.Catch(exception => {
 					Debug.LogError(exception);
-					Dispatcher.Add(() => {
+					Dispatcher.Enqueue(() => {
 						result.TryInvoke(false);
 					});
 				});

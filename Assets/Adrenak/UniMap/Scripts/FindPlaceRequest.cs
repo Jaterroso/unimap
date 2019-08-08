@@ -195,7 +195,7 @@ namespace Adrenak.UniMap {
 			client.ExecuteAsync(request)
 				.Then(response => {
 					if (response.IsSuccess()) {
-						Dispatcher.Add(() => {
+						Dispatcher.Enqueue(() => {
 							try {
 								var result = JsonUtility.FromJson<FindPlaceResponse>(response.Content);
 								onResult.TryInvoke(result);
@@ -206,10 +206,10 @@ namespace Adrenak.UniMap {
 						});
 					}
 					else
-						Dispatcher.Add(() => onException.TryInvoke(response.GetException()));
+						Dispatcher.Enqueue(() => onException.TryInvoke(response.GetException()));
 				})
 				.Catch(exception => {
-					Dispatcher.Add(() => onException.TryInvoke(exception));
+					Dispatcher.Enqueue(() => onException.TryInvoke(exception));
 				});
 		}
 

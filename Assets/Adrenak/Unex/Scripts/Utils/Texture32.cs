@@ -30,7 +30,7 @@ namespace Adrenak.Unex {
 			Width = width;
 			Height = height;
 		}
-
+		
 		/// <summary>
 		/// Creates a Texture32 isntance from a Texture2D object
 		/// </summary>
@@ -75,7 +75,7 @@ namespace Adrenak.Unex {
 				}
 				return new Texture32(bytes, width, height);
 			}
-			catch (Exception e) {
+			catch(Exception e) {
 				Debug.LogError(e);
 				return null;
 			}
@@ -95,7 +95,7 @@ namespace Adrenak.Unex {
 				Width = block.Width;
 				Height = block.Height;
 			}
-			catch (Exception e) {
+			catch(Exception e) {
 				Debug.LogError(e);
 			}
 		}
@@ -120,18 +120,18 @@ namespace Adrenak.Unex {
 		/// <param name="sourceHeight">The height of the block</param>
 		public void ReplaceBlock(int destX, int destY, Color32[] pixels, int sourceWidth, int sourceHeight) {
 			try {
-				for (int i = 0; i < sourceWidth; i++) {
-					for (int j = 0; j < sourceHeight; j++) {
+				for(int i = 0; i < sourceWidth; i++) {
+					for(int j = 0; j < sourceHeight; j++) {
 						var pixel = pixels[j * sourceWidth + i];
 						SetPixel(destX + i, destY + j, pixel);
 					}
 				}
 			}
-			catch (Exception e) {
+			catch(Exception e) {
 				Debug.LogError(e);
 			}
 		}
-
+		
 		/// <summary>
 		/// Creates and returns a Texture2D objects from the internal Color32 pixels
 		/// </summary>
