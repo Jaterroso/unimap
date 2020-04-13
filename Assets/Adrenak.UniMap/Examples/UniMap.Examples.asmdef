@@ -1,0 +1,15 @@
+{
+    "name": "UniMap.Examples",
+    "references": [
+        "UniMap.Runtime",
+        "Adrenak.Unex.Runtime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

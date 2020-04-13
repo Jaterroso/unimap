@@ -1,0 +1,26 @@
+{
+	"name": "com.adrenak.unimap",
+	"version": "0.0.0",
+	"displayName": "UniMap",
+	"description": "C# Unity3D Google Maps wrapper for Unity",
+	"unity": "2018.4",
+	"author": {
+		"name": "Vatsal Ambastha",
+		"url": "http://www.vatsalambastha.com"
+	},
+	"dependencies": {
+		"com.adrenak.unex": "2.2.0",
+		"com.adrenak.restsharp.unity": "1.1.0"
+	},
+	"scopedRegistries": [
+		{
+			"name": "registry.npmjs.org",
+			"url": "https://registry.npmjs.org",
+			"scopes": [
+				"com.adrenak.unex",
+				"com.adrenak.restsharp.unity",
+				"org.npmjs"
+			]
+		}
+	]
+}
