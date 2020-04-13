@@ -1,6 +1,6 @@
 {
 	"name": "com.adrenak.unimap",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"displayName": "UniMap",
 	"description": "C# Unity3D Google Maps wrapper for Unity",
 	"unity": "2018.4",
